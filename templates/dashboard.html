@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% block content %}
+    <h1>Bunky</h1>
+
+    <h3>Enter up to 5 artists</h3>
+    <form action="/search-for-shows"> 
+        <input type="text" name="artist1">
+        <p></p>
+        <input type="text" name="artist2">
+        <p></p>
+        <input type="text" name="artist3">
+        <p></p>
+        <input type="text" name="artist4">
+        <p></p>
+        <input type="text" name="artist5">
+        <p></p>        
+        <input type="submit" value="Search" id="search-shows" onclick="show('show-results');">
+    </form>
+
+    <div id="show-results">
+        <h2>Related Artists</h2>
+        <ul>
+          Number of related artists: {{ count }}
+          <p></p>
+          {% for artist in related_artists %}
+            <li>{{ artist }}</li>
+          {% endfor %}
+        </ul>
+    </div>
+
+    <h3>Saved Shows</h3>
+
+    <p></p>
+    <p></p>
+
+    <h3>Playlists</h3>
+
+<script src="http://code.jquery.com/jquery.js"></script>
+
+<script>
+
+function showShows(result) {
+
+    $("#show-results").text(result)
+}
+
+function getRelatedArtists(evt) {
+
+    var userInputs = {
+
+        "artist1" = artist1, 
+        "artist2" = artist2,
+        "artist3" = artist3,
+        "artist4" = artist4,
+        "artist5" = artist5,
+
+};
+
+    $.get("/search-for-shows", 
+        userInputs, 
+        showShows)
+};
+
+$('#search-shows').click(getRelatedArtists);
+
+</script>
+
+
+
+{% endblock %}

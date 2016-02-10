@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block content %}
+
+    <h2>Find cool shows! Create a new account below.</h2>
+
+    <form action='/process-new-account-form' method="POST">
+        Email: 
+        <input type="text" name="email">
+        <p></p>
+        Password: 
+        <input type="text" name="password">
+        <p></p>
+        <input type="submit" value="Create Account">
+    </form>
+
+
+{% endblock %}
