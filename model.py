@@ -1,6 +1,7 @@
-"""Models and database functions for Bunkee."""
+"""Models and database functions for Bunky."""
 
 from flask_sqlalchemy import SQLAlchemy
+
 
 
 # Here's where we create the idea of our database. We're getting this through
@@ -22,6 +23,7 @@ class User(db.Model):
     email = db.Column(db.String(50), nullable=False)
     password = db.Column(db.String(50), nullable=False)
     user_spotify_id = db.Column(db.String(100), nullable=True)
+    
 
     def __repr__(self):
         """Provide helpful representation when printed."""
@@ -33,14 +35,11 @@ class User(db.Model):
 class UserEvent(db.Model):
     """Association table for events user has saved."""
 
-    __tablename__ = "user-events"
+    __tablename__ = "user_events"
 
     user_event_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=False)
-    event_id = db.Column(db.Integer, db.ForeignKey('events.user_id'), nullable=False)
-
-    user = db.relationship('User', backref=db.backref("users"))
-    event = db.relationship('Event', backref=db.backref("events"))
+    event_id = db.Column(db.Integer, db.ForeignKey('events.event_id'), nullable=False)
 
 
 class Event(db.Model):
@@ -50,20 +49,37 @@ class Event(db.Model):
 
     event_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     songkick_id = db.Column(db.String(100), nullable=True)
-    artist = db.Column(db.String(50), nullable=False)
+    artist_id = db.Column(db.Integer, db.ForeignKey('artists.artist_id'), nullable=False)
     venue_name = db.Column(db.String(50), nullable=False)
     datetime = db.Column(db.DateTime, nullable=False)
-    street_address = db.Column(db.String(50), nullable=True)
-    city = db.Column(db.String(50), nullable=True)
-    zipcode = db.Column(db.String(20), nullable=False)
+    location = db.Column(db.String(100), nullable=True)
+
+    artist = db.relationship('Artist', backref=db.backref("artists"))
 
     def __repr__(self):
         """Provide helpful representation when printed."""
 
-        return "<Event event_id=%s artist =%s venue_name=%s datetime =%s>" % (self.event_id,
-                                                                            self.artist,
-                                                                            self.venue_name,
-                                                                            self.datetime)
+        return "<Event event_id=%s artist_id =%s venue_name=%s datetime =%s>" % (self.event_id,
+                                                                                 self.artist_id,
+                                                                                 self.venue_name,
+                                                                                 self.datetime)
+
+class Artist(db.Model):
+    """Need this table to show path taken to get from artist entered to artist with upcoming event. Also use for saving event."""
+
+    __tablename__ = "artists"
+
+    artist_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    artist_name = db.Column(db.String(50), nullable=False)
+    artist_img = db.Column(db.String(100), nullable=False)
+    artist_sample = db.Column(db.String(100), nullable=False)
+
+    def __repr__(self):
+        """Provide helpful representation when printed."""
+
+        return "<Event artist_id=%s artist_name =%s>" % (self.artist_id,
+                                                         self.artist_name)
+
 
 class Playlist(db.Model):
     """A playlist can only belong to one user."""
@@ -90,7 +106,7 @@ def connect_to_db(app):
     """Connect the database to our Flask app."""
 
     # Configure to use our SQLite database
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgres:///bunkee'
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgres:///bunkydb'
     app.config['SQLALCHEMY_ECHO'] = True
     db.app = app
     db.init_app(app)

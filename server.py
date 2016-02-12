@@ -4,6 +4,7 @@ from jinja2 import StrictUndefined
 
 from flask import Flask, render_template, redirect, request, flash, session, url_for
 from flask_debugtoolbar import DebugToolbarExtension
+from model import connect_to_db, db, User, Artist, Event, UserEvent, Playlist
 
 spotify = spotipy.Spotify()
 
@@ -20,6 +21,32 @@ def login():
 
     return render_template("login.html")
 
+@app.route('/logged-in', methods=["POST"])
+def logged_in():
+    """Users with an account can login."""
+
+    email = request.form.get("email")
+    password = request.form.get("password")
+
+
+    user = User.query.filter(User.email == email).first()
+
+    if user.password == password:
+        user_id = user.user_id
+        session['user'] = user_id
+        print user_id
+        flash(("Hello %s, you are now logged in.") % email)
+        return redirect('/dashboard')
+
+    else:
+        return "Incorrect password. <a href='/dashboard'>Try again.</a>"
+
+@app.route('/log-out')
+def logout():
+
+    del session['user']
+    flash("Goodbye, you are now logged out.")
+    return redirect('/dashboard')
 
 @app.route('/create-account')
 def create_account():
@@ -35,8 +62,13 @@ def create_new_user():
     email = request.form.get("email")
     password = request.form.get("password")
 
-    print "Email: ", email
-    print "Password: ", password
+    user = User.query.filter(User.email == email).first()
+    print user
+
+    if user == None:
+        user = User(email=email, password=password)
+        db.session.add(user)
+        db.session.commit()
 
     return redirect("/")
 
@@ -105,14 +137,10 @@ def search_for_shows():
         for related_artist in related_artists_list:
             all_artists.append(related_artist[0])
 
-    print all_artists
     number_of_related_all = len(all_artists)
-    print "All artists count: ", number_of_related_all
     no_duplicates = set(all_artists)
     count = len(no_duplicates)
     related_artists = list(no_duplicates)
-
-    print "********", no_duplicates
 
     return render_template("dashboard.html",
                             related_artists=related_artists,
@@ -124,7 +152,7 @@ if __name__ == "__main__":
     # that we invoke the DebugToolbarExtension
     app.debug = True
 
-    # connect_to_db(app)
+    connect_to_db(app)
 
     # Use the DebugToolbar
     DebugToolbarExtension(app)

@@ -2,16 +2,41 @@
 <html>
 <head>
   <title>Bunky</title>
+
+  <link rel="stylesheet" href="main.css">
+  
 </head>
 
 <body>
   
+   {% if 'user' not in session %} 
+
+   <ul>
+
+        <form action="/logged-in" method="POST">
+            <li id="email">Email: 
+            <input type="text" name="email"></li>
+            <p></p>
+            <li id="password">Password: 
+            <input type="text" name="password"></li>
+            <p></p>
+            <input type="submit" value="Login">
+        </form>
+        <p></p>
+
+        <li><a href="/create-account">Create Account</a></li>
+
+    {% else %}
+     <li><a href="/log-out">Log Out</a></li>
+    {% endif %}
+    </ul>
 
   <ul>
     {% for message in get_flashed_messages() %}
     <li>{{ message }}</li>
     {% endfor %}
   </ul>
+
 
   {% block content %} put your content here {% endblock %}
 
