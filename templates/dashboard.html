@@ -2,32 +2,21 @@
 {% block content %}
     <h1>Bunky</h1>
 
-    <h3>Enter up to 5 artists</h3>
-    <form action="/search-for-shows"> 
-        <input type="text" name="artist1">
+    <h3>Enter an artist and city</h3>
+    <form> 
+        <input type="text" name="artist" id="artist">
         <p></p>
-        <input type="text" name="artist2">
+        <input type="text" name="city" id="city">
         <p></p>
-        <input type="text" name="artist3">
-        <p></p>
-        <input type="text" name="artist4">
-        <p></p>
-        <input type="text" name="artist5">
-        <p></p>        
-        <input type="submit" value="Search" id="search-shows" onclick="show('show-results');">
+        <input type="submit" value="Search" id="search-shows">
     </form>
 
     <p></p>
 
     <div id="show-results">
-        <h2>Related Artists</h2>
-        <ul>
-          Number of related artists: {{ count }}
-          <p></p>
-          {% for artist in related_artists %}
-            <li>{{ artist }}</li>
-          {% endfor %}
-        </ul>
+        <span id="searched-artist"></span>
+        <div><img src="" id="searched-artist-img"></div>
+        <ul id="event-results"></ul>
     </div>
 
     <h3>Saved Shows</h3>
@@ -41,29 +30,57 @@
 
 <script>
 
-function showShows(result) {
+function showEvents(result) {
 
-    $("#show-results").text(result)
+
+    $("#searched-artist").text("Shows for artists related to "+result.artist); 
+    $("#searched-artist-img").attr("src", result.searched_artist_img).attr("height", 500);
+
+    var events = [];
+
+    for (var key in result.events) {
+   
+        console.log(result.events[key]['event']);
+        var event_id = result.events[key]['event'];
+
+        if (event_id != null) {
+        
+        events.push(event_id); 
+
+        }
+
+    }
+
+    console.log(events);
+
+    for (i=0; i < events.length; i++) {
+
+        $("#event-results").append("<li>"+events[i]+"</li>");
+
+
+    }; 
+
 }
 
-function getRelatedArtists(evt) {
+function findEvents(evt) {
+
+    evt.preventDefault(); 
 
     var userInputs = {
 
-        "artist1" = artist1, 
-        "artist2" = artist2,
-        "artist3" = artist3,
-        "artist4" = artist4,
-        "artist5" = artist5,
+        artist: $("#artist").val(), 
+        city: $("#city").val()
 
-};
 
-    $.get("/search-for-shows", 
+    };
+
+    $.get("/search-for-shows.json", 
         userInputs, 
-        showShows)
+        showEvents);
+
 };
 
-$('#search-shows').click(getRelatedArtists);
+$('#search-shows').click(findEvents);
 
 </script>
 

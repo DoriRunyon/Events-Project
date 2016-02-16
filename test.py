@@ -66,31 +66,75 @@ def get_related_artists(artist):
 
     artist_uri = get_artist_spotify_uri(artist)
 
+    results = spotify.search(q='artist:' + artist, type='artist')
+    items = results['artists']['items']
+    if len(items) > 0:
+        artist_lu = items[0]
+        artist_img = artist_lu['images'][0]['url']
+    else:
+        artist_img = None
+
     #put all related artist info into dict, value is list -->
     #[identifier for relationship sequence, spotify URI, songkick URI or None for no event found]
-    related_artist_dict[artist] = {'relationship_id': "A", 'spotify_uri': artist_uri, 'event': None}
+    related_artist_dict[artist] = {'spotify_uri': artist_uri, 'event': None, 'img': artist_img}
 
     #get related artists for user entered artist
     related_artists = spotify.artist_related_artists(related_artist_dict[artist]['spotify_uri'])
     related_artists = related_artists['artists']
 
-    count = 1
-
-    #count is for assigning each related artist an identifier (for showing relationship sequence later)
-    #this function goes through each related artist and organizes their info in a dictionary
     for artist in related_artists:
-        count = str(count)
         artist_name = artist['name']
         artist_uri = artist['uri'].lstrip("spotify:artist:")
-        relationship_id = "B" + count
-
-        related_artist_dict[artist_name] = {'relationship_id': relationship_id, 'spotify_uri': artist_uri, 'event': None}
-    
-        count = int(count)
-        count += 1
-
+        artist_img = artist['images'][0]['url']
+        related_artist_dict[artist_name] = {'spotify_uri': artist_uri, 'event': None, 'img': artist_img}
 
     return related_artist_dict
+
+def second_level_related(artist):
+    """Get related artists for 20 directly related artists (twenty for each artist)."""
+
+    related_artist_dict = get_related_artists(artist)
+    print len(related_artist_dict)
+
+    related_artists_lists = []
+
+    for artist, value in related_artist_dict.iteritems():
+        related_artists = spotify.artist_related_artists(related_artist_dict[artist]['spotify_uri'])
+        related_artists = related_artists['artists']
+        related_artists_lists.append(related_artists)
+
+    for artist_list in related_artists_lists:
+        for artist in artist_list:
+            if artist['name'] in related_artist_dict.keys():
+                continue
+            else:
+                artist_name = artist['name']
+                artist_uri = artist['uri'].lstrip("spotify:artist:")
+                related_artist_dict[artist_name] = {'relationship_id': None, 'spotify_uri': artist_uri, 'event': None}
+
+    return related_artist_dict
+
+# print len(second_search("Blood Orange"))
+
+# def get_related_artists(artist):
+#     """Get related artists for user entered artist and organize all the info in a dictionary."""
+
+#     count = 1
+
+#     #count is for assigning each related artist an identifier (for showing relationship sequence later)
+#     #this function goes through each related artist and organizes their info in a dictionary
+#     for artist in related_artists:
+#         count = str(count)
+#         artist_name = artist['name']
+#         artist_uri = artist['uri'].lstrip("spotify:artist:")
+#         relationship_id = "B" + count
+
+#         related_artist_dict[artist_name] = {'relationship_id': relationship_id, 'spotify_uri': artist_uri, 'event': None}
+#         count = int(count)
+#         count += 1
+
+
+#     return related_artist_dict
 
 
 
@@ -98,17 +142,14 @@ def check_for_events(artist, user_city):
     """Checks for events for a given dictionary of artists and adds Songkick URI to the dictionary if event is found."""
 
     related_artist_dict = get_related_artists(artist)
-    second_level_search = []
-    event_ids= []
 
-    for artists, info in related_artist_dict.iteritems():
+    for artist, info in related_artist_dict.iteritems():
 
 
-        payload = {'query': artists, 'apikey': api_key}
+        payload = {'query': artist, 'apikey': api_key}
         artist_request = 'http://api.songkick.com/api/3.0/search/artists.json'
-        artist = requests.get(artist_request, params=payload)
-        jdict_artist = artist.json()
-
+        artist_id = requests.get(artist_request, params=payload)
+        jdict_artist = artist_id.json()
 
         if 'artist' in jdict_artist['resultsPage']['results']:
             artist_songkick_id = jdict_artist['resultsPage']['results']['artist'][0]['id']
@@ -126,41 +167,33 @@ def check_for_events(artist, user_city):
                 city = event['location']['city']
                 if user_city in city:
                     event_id = event['id']
-                    event_ids.append(event_id)
-                    print artists, event_id
+                    related_artist_dict[artist]['event'] = event_id
+
+                      
+    return related_artist_dict
+
+# check_for_events("Radiohead", "San Francisco")
 
 
-    return second_level_search
 
-check_for_events("Bryan Ferry", "San Francisco")
-
-def second_search(artist, user_city):
-
-    second_level_search = check_for_events(artist, user_city)
-
-    for artist in second_level_search:
-        artist_dict = get_related_artists(artist)
-        events = check_for_events(artist, user_city)
-
-    return "DONE!"
 
 # second_search("David Bowie", "San Francisco")
 
-artist = "Blood Orange"
-user_city = "London"
+# artist = "Blood Orange"
+# user_city = "London"
 
-payload = {'query': artist, 'apikey': api_key}
-artist_request = 'http://api.songkick.com/api/3.0/search/artists.json'
-artist = requests.get(artist_request, params=payload)
-jdict_artist = artist.json()
+# payload = {'query': artist, 'apikey': api_key}
+# artist_request = 'http://api.songkick.com/api/3.0/search/artists.json'
+# artist = requests.get(artist_request, params=payload)
+# jdict_artist = artist.json()
 
-artist_songkick_id = jdict_artist['resultsPage']['results']['artist'][0]['id']
+# artist_songkick_id = jdict_artist['resultsPage']['results']['artist'][0]['id']
 
-# event_request = "http://api.songkick.com/api/3.0/artists/%s/calendar.json?apikey=%s" % (artist_songkick_id, api_key)
-event_url = "http://api.songkick.com/api/3.0/artists/%s/calendar.json" % artist_songkick_id
-events = requests.get(event_url, params={'apikey': api_key, 'per_page': 2, 'page': 2})
+# # event_request = "http://api.songkick.com/api/3.0/artists/%s/calendar.json?apikey=%s" % (artist_songkick_id, api_key)
+# event_url = "http://api.songkick.com/api/3.0/artists/%s/calendar.json" % artist_songkick_id
+# events = requests.get(event_url, params={'apikey': api_key, 'per_page': 2, 'page': 2})
 
-jdict_events = events.json()
+# jdict_events = events.json()
 # pprint(jdict_events)
 # print len(jdict_events['resultsPage']['results']['event'])
 
@@ -172,15 +205,31 @@ jdict_events = events.json()
 #     print city
 #     print user_city
 #     if user_city in city:
-#         events_found.append(event['id'])
+# #         events_found.append(event['id'])
+
+# city = "London"
+# payload = {'query': city, 'apikey': api_key}
+# metro_id_request = 'http://api.songkick.com/api/3.0/search/locations.json'
+# metro_id = requests.get(metro_id_request, params=payload)
+# jdict_metroid = metro_id.json()
+
+# lat = jdict_metroid['resultsPage']['results']['location'][0]['city']['lat']
+# lng = jdict_metroid['resultsPage']['results']['location'][0]['city']['lng']
 
 
+# artist = "Blood Orange"
+
+# geo = "geo:%s,%s" % (lat, lng)
 
 
+# event_search_by_location = 'http://api.songkick.com/api/3.0/search/locations.json'
+# payload = {'apikey': api_key, 'location': geo}
 
+# events = requests.get(event_search_by_location, params=payload)
+# jdict_events = events.json()
+# pprint(jdict_events)
 
-
-
+# if jdict_events[]
 
 
 

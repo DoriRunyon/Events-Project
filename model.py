@@ -64,6 +64,18 @@ class Event(db.Model):
                                                                                  self.venue_name,
                                                                                  self.datetime)
 
+# class Artist:
+
+#     def __init__(self):
+#         self.name = ''
+#         self.related_artists = []
+
+
+# a = Artist('Chumbawumba')
+# a.related_artists.append(related)
+
+# for []
+
 class Artist(db.Model):
     """Need this table to show path taken to get from artist entered to artist with upcoming event. Also use for saving event."""
 

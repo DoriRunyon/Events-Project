@@ -3,39 +3,55 @@
 <head>
   <title>Bunky</title>
 
-  <link rel="stylesheet" href="main.css">
+  <link rel="stylesheet" type="text/css" href="/static/style.css">
+
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+
   
 </head>
 
 <body>
-  
+
+  <nav class="navbar navbar-default">
+
+    <div class="container-fluid">
+      <div class="navbar-header">
+        <div id="navbar">
    {% if 'user' not in session %} 
 
-   <ul>
+               <ul class="nav navbar-nav">
+                    <form action="/logged-in" method="POST">
+                        <li id="email">Email: 
+                        <input type="text" name="email"></li>
+            
+                        <li id="password">Password: 
+                        <input type="text" name="password"></li>
+                      
+                        <input type="submit" value="Login">
+                    </form>
+              
 
-        <form action="/logged-in" method="POST">
-            <li id="email">Email: 
-            <input type="text" name="email"></li>
-            <p></p>
-            <li id="password">Password: 
-            <input type="text" name="password"></li>
-            <p></p>
-            <input type="submit" value="Login">
-        </form>
-        <p></p>
+                    <li><a href="/create-account">Create Account</a></li>
 
-        <li><a href="/create-account">Create Account</a></li>
+                {% else %}
+                 <li><a href="/log-out">Log Out</a></li>
+                {% endif %}
+                </ul>
 
-    {% else %}
-     <li><a href="/log-out">Log Out</a></li>
-    {% endif %}
-    </ul>
+              </div>
+          </div>
+      </div>
+    </nav>
 
-  <ul>
-    {% for message in get_flashed_messages() %}
-    <li>{{ message }}</li>
-    {% endfor %}
-  </ul>
+              <ul>
+                {% for message in get_flashed_messages() %}
+                <li>{{ message }}</li>
+                {% endfor %}
+              </ul>
+
+    <script src="http://code.jquery.com/jquery.js"></script>
+
+     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
 
 
   {% block content %} put your content here {% endblock %}
