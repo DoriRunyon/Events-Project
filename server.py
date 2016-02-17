@@ -5,7 +5,7 @@ from jinja2 import StrictUndefined
 from flask import Flask, render_template, redirect, request, flash, session, url_for, jsonify
 from flask_debugtoolbar import DebugToolbarExtension
 from model import connect_to_db, db, User, Artist, Event, UserEvent, Playlist
-from test import get_artist_spotify_uri, get_related_artists, second_level_related, check_for_events
+from test import get_artist_spotify_uri, get_related_artists, check_for_events
 
 spotify = spotipy.Spotify()
 

@@ -7,49 +7,6 @@ api_key = os.environ['SONGKICK_API_KEY']
 
 spotify = spotipy.Spotify()
 
-# def get_id_for_metro_area(location):
-
-#     payload = {'query': location, 'apikey': api_key}
-
-#     location_request = 'http://api.songkick.com/api/3.0/search/locations.json'
-#     locations = requests.get(location_request, params=payload)
-#     jdict_location = locations.json()
-#     metro_id = jdict_location["resultsPage"]["results"]["location"][0]["metroArea"]["id"]
-
-#     return metro_id
-
-
-# def get_events_given_metro_id(metro_id):
-
-#     metro_area_event_look_up = "http://api.songkick.com/api/3.0/metro_areas/%s/calendar.json?apikey=%s" % (metro_id, api_key)
-#     events = requests.get(metro_area_event_look_up)
-#     jdict_events = events.json()
-#     dict_of_events = jdict_events['resultsPage']['results']['event']
-
-#     final_event_dict = {}
-
-#     for event in dict_of_events:
-#         city = event["location"]["city"]
-#         if event["performance"] == []:
-#             artist = "Festival"
-#         else:
-#             artist = event["performance"][0]["artist"]["displayName"]
-#         venue = event["venue"]["displayName"]
-#         date = event["start"]["date"]
-#         uri = event["uri"]
-#         final_event_dict[uri] = [artist, city, venue, date]
-
-#     return final_event_dict
-
-# SF_ID = get_id_for_metro_area("San Francisco")
-# SF_events = get_events_given_metro_id(SF_ID)
-
-# for key, value in SF_events.iteritems():
-#     print key, value
-
-
-# ****************************************
-
 
 
 def get_artist_spotify_uri(artist):
@@ -59,12 +16,8 @@ def get_artist_spotify_uri(artist):
 
     return artist_uri
 
-def get_related_artists(artist):
-    """Get related artists for user entered artist and organize all the info in a dictionary."""
-
-    related_artist_dict = {}
-
-    artist_uri = get_artist_spotify_uri(artist)
+def get_artist_img(artist): 
+    """Get an artist's image from Spotify when given artist name."""
 
     results = spotify.search(q='artist:' + artist, type='artist')
     items = results['artists']['items']
@@ -73,6 +26,15 @@ def get_related_artists(artist):
         artist_img = artist_lu['images'][0]['url']
     else:
         artist_img = None
+
+    return artist_img
+
+def get_related_artists(artist):
+    """Get related artists for user entered artist and organize all the info in a dictionary."""
+
+    related_artist_dict = {}
+    artist_uri = get_artist_spotify_uri(artist)
+    artist_img = get_artist_img(artist)
 
     #put all related artist info into dict, value is list -->
     #[identifier for relationship sequence, spotify URI, songkick URI or None for no event found]
@@ -89,52 +51,6 @@ def get_related_artists(artist):
         related_artist_dict[artist_name] = {'spotify_uri': artist_uri, 'event': None, 'img': artist_img}
 
     return related_artist_dict
-
-def second_level_related(artist):
-    """Get related artists for 20 directly related artists (twenty for each artist)."""
-
-    related_artist_dict = get_related_artists(artist)
-    print len(related_artist_dict)
-
-    related_artists_lists = []
-
-    for artist, value in related_artist_dict.iteritems():
-        related_artists = spotify.artist_related_artists(related_artist_dict[artist]['spotify_uri'])
-        related_artists = related_artists['artists']
-        related_artists_lists.append(related_artists)
-
-    for artist_list in related_artists_lists:
-        for artist in artist_list:
-            if artist['name'] in related_artist_dict.keys():
-                continue
-            else:
-                artist_name = artist['name']
-                artist_uri = artist['uri'].lstrip("spotify:artist:")
-                related_artist_dict[artist_name] = {'relationship_id': None, 'spotify_uri': artist_uri, 'event': None}
-
-    return related_artist_dict
-
-# print len(second_search("Blood Orange"))
-
-# def get_related_artists(artist):
-#     """Get related artists for user entered artist and organize all the info in a dictionary."""
-
-#     count = 1
-
-#     #count is for assigning each related artist an identifier (for showing relationship sequence later)
-#     #this function goes through each related artist and organizes their info in a dictionary
-#     for artist in related_artists:
-#         count = str(count)
-#         artist_name = artist['name']
-#         artist_uri = artist['uri'].lstrip("spotify:artist:")
-#         relationship_id = "B" + count
-
-#         related_artist_dict[artist_name] = {'relationship_id': relationship_id, 'spotify_uri': artist_uri, 'event': None}
-#         count = int(count)
-#         count += 1
-
-
-#     return related_artist_dict
 
 
 
@@ -169,13 +85,13 @@ def check_for_events(artist, user_city):
                     event_id = event['id']
                     related_artist_dict[artist]['event'] = event_id
 
-                      
+                     
     return related_artist_dict
 
+
+
+
 # check_for_events("Radiohead", "San Francisco")
-
-
-
 
 # second_search("David Bowie", "San Francisco")
 
@@ -232,10 +148,98 @@ def check_for_events(artist, user_city):
 # if jdict_events[]
 
 
+# def get_id_for_metro_area(location):
+
+#     payload = {'query': location, 'apikey': api_key}
+
+#     location_request = 'http://api.songkick.com/api/3.0/search/locations.json'
+#     locations = requests.get(location_request, params=payload)
+#     jdict_location = locations.json()
+#     metro_id = jdict_location["resultsPage"]["results"]["location"][0]["metroArea"]["id"]
+
+#     return metro_id
 
 
+# def get_events_given_metro_id(metro_id):
+
+#     metro_area_event_look_up = "http://api.songkick.com/api/3.0/metro_areas/%s/calendar.json?apikey=%s" % (metro_id, api_key)
+#     events = requests.get(metro_area_event_look_up)
+#     jdict_events = events.json()
+#     dict_of_events = jdict_events['resultsPage']['results']['event']
+
+#     final_event_dict = {}
+
+#     for event in dict_of_events:
+#         city = event["location"]["city"]
+#         if event["performance"] == []:
+#             artist = "Festival"
+#         else:
+#             artist = event["performance"][0]["artist"]["displayName"]
+#         venue = event["venue"]["displayName"]
+#         date = event["start"]["date"]
+#         uri = event["uri"]
+#         final_event_dict[uri] = [artist, city, venue, date]
+
+#     return final_event_dict
+
+# SF_ID = get_id_for_metro_area("San Francisco")
+# SF_events = get_events_given_metro_id(SF_ID)
+
+# for key, value in SF_events.iteritems():
+#     print key, value
 
 
+# ****************************************
+
+
+# def second_level_related(artist):
+#     """Get related artists for 20 directly related artists (twenty for each artist)."""
+
+#     related_artist_dict = get_related_artists(artist)
+#     print len(related_artist_dict)
+
+#     related_artists_lists = []
+
+#     for artist, value in related_artist_dict.iteritems():
+#         related_artists = spotify.artist_related_artists(related_artist_dict[artist]['spotify_uri'])
+#         related_artists = related_artists['artists']
+#         related_artists_lists.append(related_artists)
+
+#     for artist_list in related_artists_lists:
+#         for artist in artist_list:
+#             if artist['name'] in related_artist_dict.keys():
+#                 continue
+#             else:
+#                 artist_name = artist['name']
+#                 artist_uri = artist['uri'].lstrip("spotify:artist:")
+#                 related_artist_dict[artist_name] = {'relationship_id': None, 'spotify_uri': artist_uri, 'event': None}
+
+#     return related_artist_dict
+
+
+# 
+
+# print len(second_search("Blood Orange"))
+
+# def get_related_artists(artist):
+#     """Get related artists for user entered artist and organize all the info in a dictionary."""
+
+#     count = 1
+
+#     #count is for assigning each related artist an identifier (for showing relationship sequence later)
+#     #this function goes through each related artist and organizes their info in a dictionary
+#     for artist in related_artists:
+#         count = str(count)
+#         artist_name = artist['name']
+#         artist_uri = artist['uri'].lstrip("spotify:artist:")
+#         relationship_id = "B" + count
+
+#         related_artist_dict[artist_name] = {'relationship_id': relationship_id, 'spotify_uri': artist_uri, 'event': None}
+#         count = int(count)
+#         count += 1
+
+
+#     return related_artist_dict
 
 
 

@@ -4,9 +4,9 @@
 
     <h3>Enter an artist and city</h3>
     <form> 
-        <input type="text" name="artist" id="artist">
+        Artist <input type="text" name="artist" id="artist">
         <p></p>
-        <input type="text" name="city" id="city">
+        City<input type="text" name="city" id="city">
         <p></p>
         <input type="submit" value="Search" id="search-shows">
     </form>
@@ -34,7 +34,7 @@ function showEvents(result) {
 
 
     $("#searched-artist").text("Shows for artists related to "+result.artist); 
-    $("#searched-artist-img").attr("src", result.searched_artist_img).attr("height", 500);
+    $("#searched-artist-img").attr("src", result.searched_artist_img).attr("height", 200).attr("width", 200);
 
     var events = [];
 
@@ -50,8 +50,6 @@ function showEvents(result) {
         }
 
     }
-
-    console.log(events);
 
     for (i=0; i < events.length; i++) {
 
