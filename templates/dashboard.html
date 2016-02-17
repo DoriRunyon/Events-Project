@@ -14,51 +14,55 @@
     <p></p>
 
     <div id="show-results">
-        <span id="searched-artist"></span>
         <div><img src="" id="searched-artist-img"></div>
-        <ul id="event-results"></ul>
+        <p></p>
+        <p></p>
+        <span style="font-weight: bold" id="searched-artist"></span>
+        <p></p>
+        <p></p>
+        <div id="event-results"></div>
     </div>
 
-    <h3>Saved Shows</h3>
+    <h3>My Saved Shows</h3>
 
     <p></p>
     <p></p>
-
-    <h3>Playlists</h3>
 
 <script src="http://code.jquery.com/jquery.js"></script>
 
 <script>
 
 function showEvents(result) {
-
-
+ 
+    $("#searched-artist-img").attr("src", result.searched_artist_img).attr("height", 500);
     $("#searched-artist").text("Shows for artists related to "+result.artist); 
-    $("#searched-artist-img").attr("src", result.searched_artist_img).attr("height", 200).attr("width", 200);
-
-    var events = [];
 
     for (var key in result.events) {
-   
-        console.log(result.events[key]['event']);
-        var event_id = result.events[key]['event'];
 
-        if (event_id != null) {
-        
-        events.push(event_id); 
+        console.log(result.events[key]['event']); 
+
+        if ((result.events[key]['event']) != null) {
+
+            var event_name = result.events[key]['event']['event_name'];
+            var event_city = result.events[key]['event']['city'];
+            var songkick_link = result.events[key]['event']['songkick_link'];
+
+            var events = [event_name, event_city, songkick_link]
+
+            $("#event-results").append("<p id='eventname'>"+events[0]+"</p>");
+            $("#event-results").append("<p>"+events[1]+"</p>");
+            $("#event-results").append("<a href="+events[2]+">Buy Tickets</a>");
+            $("#event-results").append("<p>---------------------------------------------------</p>");
 
         }
 
-    }
 
-    for (i=0; i < events.length; i++) {
-
-        $("#event-results").append("<li>"+events[i]+"</li>");
+        }
 
 
     }; 
 
-}
+
 
 function findEvents(evt) {
 

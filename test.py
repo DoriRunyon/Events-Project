@@ -38,7 +38,9 @@ def get_related_artists(artist):
 
     #put all related artist info into dict, value is list -->
     #[identifier for relationship sequence, spotify URI, songkick URI or None for no event found]
-    related_artist_dict[artist] = {'spotify_uri': artist_uri, 'event': None, 'img': artist_img}
+    related_artist_dict[artist] = {'spotify_uri': artist_uri,
+                                    'event': None,
+                                    'img': artist_img}
 
     #get related artists for user entered artist
     related_artists = spotify.artist_related_artists(related_artist_dict[artist]['spotify_uri'])
@@ -51,7 +53,6 @@ def get_related_artists(artist):
         related_artist_dict[artist_name] = {'spotify_uri': artist_uri, 'event': None, 'img': artist_img}
 
     return related_artist_dict
-
 
 
 def check_for_events(artist, user_city):
@@ -83,12 +84,20 @@ def check_for_events(artist, user_city):
                 city = event['location']['city']
                 if user_city in city:
                     event_id = event['id']
-                    related_artist_dict[artist]['event'] = event_id
-
-                     
+                    event_name_date = event['displayName']
+                    city = event['location']['city']
+                    lat = event['location']['lat']
+                    lng = event['location']['lng']
+                    songkick_link = event['performance'][0]['artist']['uri']
+                    related_artist_dict[artist]['event'] = {'id': event_id,
+                                                            'event_name': event_name_date,
+                                                            'city': city,
+                                                            'lat': lat,
+                                                            'lng': lng,
+                                                            'songkick_link': songkick_link}
+    pprint(related_artist_dict)
+            
     return related_artist_dict
-
-
 
 
 # check_for_events("Radiohead", "San Francisco")
