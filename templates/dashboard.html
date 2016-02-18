@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% block content %}
-    <h1>Bunky</h1>
+    <h1>ShowNoodle</h1>
 
     <h3>Enter an artist and city</h3>
     <form> 
@@ -14,13 +14,14 @@
     <p></p>
 
     <div id="show-results">
-        <div><img src="" id="searched-artist-img"></div>
-        <p></p>
-        <p></p>
-        <span style="font-weight: bold" id="searched-artist"></span>
+         <p style="font-weight: bold" id="show-message"></p>
         <p></p>
         <p></p>
         <div id="event-results"></div>
+        <p></p>
+        <p></p>
+        <h4 id="related-artists-for-artist"></h4>
+        <div class="related-artists"></div>
     </div>
 
     <h3>My Saved Shows</h3>
@@ -33,33 +34,55 @@
 <script>
 
 function showEvents(result) {
- 
-    $("#searched-artist-img").attr("src", result.searched_artist_img).attr("height", 500);
-    $("#searched-artist").text("Shows for artists related to "+result.artist); 
+    
+    $(".related-artists-imgs").remove();
+    $(".event").remove(); 
+    var city = result.events[0][1]['city'];
+    city = city.substring(0, city.length - 8);
+    // var artist_name = result.related_artist_names_imgs[i][0].replace(/[_-]/g, " ");
 
-    for (var key in result.events) {
+    if (result.events.length < 1) {
 
-        console.log(result.events[key]['event']); 
+        var artist_name = result.searched_artist_name_img[0].replace(/[_-]/g, " ");
+        $("#show-message").text("Sorry, no shows found. Select another artist below to run a new search.");
+        $("#related-artists-for-artist").text("Artists similar to "+artist_name);
+    }
 
-        if ((result.events[key]['event']) != null) {
+    else {
+        var artist_name = result.searched_artist_name_img[0].replace(/[_-]/g, " ");
+        $("#show-message").text("Shows for artists similar to "+artist_name); 
+        $("#related-artists-for-artist").text("Artists similar to "+artist_name);
+    }
 
-            var event_name = result.events[key]['event']['event_name'];
-            var event_city = result.events[key]['event']['city'];
-            var songkick_link = result.events[key]['event']['songkick_link'];
+
+    for (i=0; i< result.events.length; i++) {
+
+            var event_name = result.events[i][1]['event_name'];
+            var event_city = result.events[i][1]['city'];
+            var songkick_link = result.events[i][1]['songkick_link'];
 
             var events = [event_name, event_city, songkick_link]
 
-            $("#event-results").append("<p id='eventname'>"+events[0]+"</p>");
-            $("#event-results").append("<p>"+events[1]+"</p>");
-            $("#event-results").append("<a href="+events[2]+">Buy Tickets</a>");
-            $("#event-results").append("<p>---------------------------------------------------</p>");
-
-        }
+            $("#event-results").append("<p class='event' id='eventname'>"+events[0]+"</p>");
+            $("#event-results").append("<p class='event'>"+events[1]+"</p>");
+            $("#event-results").append("<a href="+events[2]+" class='event'>Buy Tickets</a>");
+            $("#event-results").append("<p class='event'>---------------------------------------------------</p>");
 
 
-        }
+        
+     }
 
+     for (i=0; i< result.related_artist_names_imgs.length; i++) {
 
+        $('.related-artists').append("<span class='related-artists-imgs'><img id="+result.related_artist_names_imgs[i][0]+" src="+result.related_artist_names_imgs[i][1]+"></span>")
+
+      }
+
+      $('.related-artists-imgs').click(function() {
+
+                alert("Hey!!!");
+        });
+    
     }; 
 
 
@@ -83,6 +106,8 @@ function findEvents(evt) {
 };
 
 $('#search-shows').click(findEvents);
+
+
 
 </script>
 

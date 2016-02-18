@@ -95,8 +95,7 @@ def check_for_events(artist, user_city):
                                                             'lat': lat,
                                                             'lng': lng,
                                                             'songkick_link': songkick_link}
-    pprint(related_artist_dict)
-            
+
     return related_artist_dict
 
 

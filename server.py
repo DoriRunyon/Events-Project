@@ -92,14 +92,27 @@ def dashboard():
 def search_for_shows():
     """Search Spotify's related artists and find artists with upcoming shows based on Songkick data."""
 
-    artist = request.args.get("artist")
+    searched_artist = request.args.get("artist")
     city = request.args.get("city")
 
-    events = check_for_events(artist, city)
+    session['city'] = city
 
-    searched_artist_img = events[artist]['img']
+    related_artist_dict = check_for_events(searched_artist, city)
 
-    results = {"events": events, "artist": artist, "searched_artist_img": searched_artist_img}
+    searched_artist_name_img = [searched_artist.replace(" ", "-"), related_artist_dict[searched_artist]['img']]
+    related_artist_names_imgs = []
+    events = []
+
+    for artist, info in related_artist_dict.iteritems():
+        if artist == searched_artist:
+            if related_artist_dict[artist]['event'] is not None:
+                events.append([artist, related_artist_dict[artist]['event']])
+        else:
+            related_artist_names_imgs.append([artist.replace(" ", "-"), related_artist_dict[artist]['img']])
+            if related_artist_dict[artist]['event'] is not None:
+                events.append([artist, related_artist_dict[artist]['event']])
+
+    results = {"events": events, "searched_artist_name_img": searched_artist_name_img, "related_artist_names_imgs": related_artist_names_imgs}
 
     return jsonify(results)
 
