@@ -1,11 +1,13 @@
 import requests, spotipy
 from pprint import pprint
 import os
+from werkzeug.contrib.cache import SimpleCache
 
 api_key = os.environ['SONGKICK_API_KEY']
 
 
 spotify = spotipy.Spotify()
+cache = SimpleCache()
 
 
 
@@ -65,15 +67,26 @@ def check_for_events(artist, user_city):
 
         payload = {'query': artist, 'apikey': api_key}
         artist_request = 'http://api.songkick.com/api/3.0/search/artists.json'
-        artist_id = requests.get(artist_request, params=payload)
+
+        artist_id = cache.get(artist)
+        print artist_id, "HEY@@"
+        if artist_id is None:
+            artist_id = requests.get(artist_request, params=payload)
+            cache.set(artist, artist_id, timeout=24 * 60 * 60)
+        
         jdict_artist = artist_id.json()
 
         if 'artist' in jdict_artist['resultsPage']['results']:
             artist_songkick_id = jdict_artist['resultsPage']['results']['artist'][0]['id']
 
             event_request = "http://api.songkick.com/api/3.0/artists/%s/calendar.json?apikey=%s" % (artist_songkick_id, api_key)
-            events = requests.get(event_request)
-            jdict_events = events.json()
+            artist_calendar = cache.get(artist_songkick_id)
+            print artist_calendar, "BOOOOP"
+            if artist_calendar is None:
+                artist_calendar = requests.get(event_request)
+                cache.set(artist_songkick_id, artist_calendar, timeout=24 * 60 * 60)
+
+            jdict_events = artist_calendar.json()
 
             if jdict_events['resultsPage']['totalEntries'] != 0:
                 list_of_events = jdict_events['resultsPage']['results']['event']

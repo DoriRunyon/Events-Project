@@ -6,10 +6,12 @@ from flask import Flask, render_template, redirect, request, flash, session, url
 from flask_debugtoolbar import DebugToolbarExtension
 from model import connect_to_db, db, User, Artist, Event, UserEvent, Playlist
 from test import get_artist_spotify_uri, get_related_artists, check_for_events
+from werkzeug.contrib.cache import SimpleCache
 
 spotify = spotipy.Spotify()
 
 app = Flask(__name__)
+cache = SimpleCache()
 
 app.secret_key = "ABC"
 
@@ -94,8 +96,6 @@ def search_for_shows():
 
     searched_artist = request.args.get("artist")
     city = request.args.get("city")
-
-    session['city'] = city
 
     related_artist_dict = check_for_events(searched_artist, city)
 
