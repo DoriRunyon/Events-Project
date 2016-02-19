@@ -1,4 +1,4 @@
-"""Models and database functions for Bunky."""
+"""Models and database functions for Noodle."""
 
 from flask_sqlalchemy import SQLAlchemy
 
@@ -15,15 +15,13 @@ db = SQLAlchemy()
 # Part 1: Compose ORM
 
 class User(db.Model):
-    """A user can have multiple playlists and multiple events."""
+    """A user can save multiple events."""
 
     __tablename__ = "users"
 
     user_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     email = db.Column(db.String(50), nullable=False)
     password = db.Column(db.String(50), nullable=False)
-    user_spotify_id = db.Column(db.String(100), nullable=True)
-    
 
     def __repr__(self):
         """Provide helpful representation when printed."""
@@ -48,11 +46,14 @@ class Event(db.Model):
     __tablename__ = "events"
 
     event_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    songkick_id = db.Column(db.String(100), nullable=True)
-    artist_id = db.Column(db.Integer, db.ForeignKey('artists.artist_id'), nullable=False)
-    venue_name = db.Column(db.String(50), nullable=False)
-    datetime = db.Column(db.DateTime, nullable=False)
-    location = db.Column(db.String(100), nullable=True)
+    event_songkick_id = db.Column(db.String(100), nullable=True)
+    artist_id = db.Column(db.Integer, db.ForeignKey('artists.artist_id'), nullable=True)
+    event_name = db.Column(db.String(100), nullable=True)
+    city = db.Column(db.String(100), nullable=True)
+    lat = db.Column(db.Float, nullable=True)
+    lng = db.Column(db.Float, nullable=True)
+    event_songkick_link = db.Column(db.String(100), nullable=True)
+    datetime = db.Column(db.DateTime, nullable=True)
 
     artist = db.relationship('Artist', backref=db.backref("artists"))
 
@@ -61,30 +62,20 @@ class Event(db.Model):
 
         return "<Event event_id=%s artist_id =%s venue_name=%s datetime =%s>" % (self.event_id,
                                                                                  self.artist_id,
-                                                                                 self.venue_name,
+                                                                                 self.event_name,
                                                                                  self.datetime)
 
-# class Artist:
-
-#     def __init__(self):
-#         self.name = ''
-#         self.related_artists = []
-
-
-# a = Artist('Chumbawumba')
-# a.related_artists.append(related)
-
-# for []
 
 class Artist(db.Model):
-    """Need this table to show path taken to get from artist entered to artist with upcoming event. Also use for saving event."""
+    """Table for generating playlist based on saved events."""
 
     __tablename__ = "artists"
 
     artist_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    artist_name = db.Column(db.String(50), nullable=False)
-    artist_img = db.Column(db.String(100), nullable=False)
-    artist_sample = db.Column(db.String(100), nullable=False)
+    artist_songkick_id = db.Column(db.String(100), nullable=True)
+    artist_spotify_id = db.Column(db.String(100), nullable=True)
+    artist_name = db.Column(db.String(50), nullable=True)
+    artist_img = db.Column(db.String(100), nullable=True)
 
     def __repr__(self):
         """Provide helpful representation when printed."""
@@ -93,32 +84,13 @@ class Artist(db.Model):
                                                          self.artist_name)
 
 
-class Playlist(db.Model):
-    """A playlist can only belong to one user."""
-
-    __tablename__ = "playlists"
-
-    playlist_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    playlist_spotify_id = db.Column(db.String(100), nullable=True)
-    playlist_name = db.Column(db.String(50), nullable=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=False)
-    created_on = db.Column(db.DateTime, nullable=False)
-
-    user = db.relationship('User', backref=db.backref("users"))
-
-    def __repr__(self):
-        """Provide helpful representation when printed."""
-
-        return "<Event playlist_id=%s playlist_name =%s created_on =%s>" % (self.playlist_id,
-                                                                                self.playlist_name,
-                                                                                self.created_on)
 
 
 def connect_to_db(app):
     """Connect the database to our Flask app."""
 
-    # Configure to use our SQLite database
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgres:///bunkydb'
+    # Configure to use our postgres database
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgres:///noodledb'
     app.config['SQLALCHEMY_ECHO'] = True
     db.app = app
     db.init_app(app)
