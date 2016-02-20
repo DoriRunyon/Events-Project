@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% block content %}
-    <h1>Noodle</h1>
+
+    <h2>Welcome, user ID No. "<span style="color: pink">{{ user_id }}</span>"</h2>
 
     <h3>Enter an artist and city</h3>
     <form> 
@@ -24,10 +25,15 @@
         <div class="related-artists"></div>
     </div>
 
+    <h3>My Saved Shows</h3>
 
-<script src="http://code.jquery.com/jquery.js"></script>
+    <div class="user-saved-shows"></div>
 
-<script type="text/javascript" src="../static/dashboard.js"></script>
+    <p></p>
+    <p></p>
+
+    <script src="http://code.jquery.com/jquery.js"></script>
+    <script type="text/javascript" src="../static/dashboard.js"></script>
 
 
 

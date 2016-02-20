@@ -46,8 +46,9 @@ def logged_in():
         user_id = user.user_id
         session['user'] = user_id
         print user_id
+        print type(user_id)
         flash(("Hello %s, you are now logged in.") % email)
-        return redirect('/dashboard')
+        return redirect(('/dashboard/%d') % (user_id))
 
     else:
         return "Incorrect password. <a href='/dashboard'>Try again.</a>"
@@ -84,9 +85,21 @@ def create_new_user():
     return redirect("/")
 
 
+@app.route('/dashboard/<int:user_id>')
+def user_dashboard(user_id):
+    """Dashboard for user, can search shows and see saved shows and playlists."""
+
+    events = ""
+    artist = ""
+
+    return render_template("user_dashboard.html",
+                            events=events,
+                            artist=artist,
+                            user_id=user_id)
+
 @app.route('/dashboard')
 def dashboard():
-    """Dashboard for user, can search shows and see saved shows and playlists."""
+    """Dashboard when logged in, can search for shows."""
 
     events = ""
     artist = ""
@@ -125,11 +138,12 @@ def search_for_shows():
     return jsonify(results)
 
 
-# @app.route('/saved-shows.json')
-# def save_show():
-#     """Save show for user, add it to their My Saved Shows."""
 
+def save_shows():
 
+    if 'user' in session:
+        print session['user'], "LOOK HERE"
+    
 
 
 def get_artist_spotify_uri(artist):

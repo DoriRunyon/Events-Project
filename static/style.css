@@ -1,0 +1,23 @@
+
+* {
+    list-style-type: none;
+
+}
+
+.nav, .navbar, .navbar-default, .navbar-default {
+    border-radius: 0px;
+
+}
+
+#eventname {
+    font-weight: bold;
+    text-decoration: underline
+}
+
+.related-artists-imgs img {
+    z-index:1;
+    width: 10%;
+    height: 10%;
+
+}
+
