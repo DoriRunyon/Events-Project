@@ -1,6 +1,7 @@
 import spotipy, requests, os
 
 from jinja2 import StrictUndefined
+from pprint import pprint
 
 from flask import Flask, render_template, redirect, request, flash, session, url_for, jsonify
 from flask_debugtoolbar import DebugToolbarExtension
@@ -124,6 +125,12 @@ def search_for_shows():
     return jsonify(results)
 
 
+# @app.route('/saved-shows.json')
+# def save_show():
+#     """Save show for user, add it to their My Saved Shows."""
+
+
+
 
 def get_artist_spotify_uri(artist):
     """Search for artist in database, if not there, get spotify URI and save artist to db."""
@@ -133,6 +140,7 @@ def get_artist_spotify_uri(artist):
         artist_uri = artist_db.artist_spotify_id
     else:
         artist_search = spotify.search(artist, limit=1, offset=0, type='artist')
+        print artist_search
         artist_uri = artist_search['artists']['items'][0]['uri'].lstrip("spotify:artist:")
         artist = Artist(artist_name=artist, artist_spotify_id=artist_uri)
         db.session.add(artist)
@@ -142,28 +150,52 @@ def get_artist_spotify_uri(artist):
 
 
 def get_artist_img(artist):
-    """Get an artist's image from Spotify when given artist name, save img to db."""
+    """Get an artist's image from Spotify."""
+
+    results = spotify.search(q='artist:' + artist, type='artist')
+    items = results['artists']['items']
+    if len(items) > 0:
+        artist_lu = items[0]
+        artist_img = artist_lu['images'][0]['url']
+    else:
+        artist_img = 'https://pbs.twimg.com/profile_images/1324123785/macaroni_noodle_icom_-_web_taken_400x400.jpg'
+
+    return artist_img
+
+
+def get_artist_songkick_id(artist):
+    """Get artist songkick id."""
+
+
+    payload = {'query': artist, 'apikey': api_key}
+    artist_request = 'http://api.songkick.com/api/3.0/search/artists.json'
+    artist_id = requests.get(artist_request, params=payload)
+    jdict_artist = artist_id.json()
+
+    if 'artist' in jdict_artist['resultsPage']['results']:
+        artist_songkick_id = jdict_artist['resultsPage']['results']['artist'][0]['id']
+    else:
+        artist_songkick_id = None
+
+    return artist_songkick_id
+
+def save_artist_to_db(artist):
+    """Look up artist in db, if not there get artist info and save it to db."""
+
+    artist_spotify_id = get_artist_spotify_uri(artist)
+    artist_img = get_artist_img(artist)
+    artist_songkick_id = get_artist_songkick_id(artist)
 
     artist_db = Artist.query.filter(Artist.artist_name == artist).first()
 
-    if artist_db is not None:
-        if artist_db.artist_img is None:
-            results = spotify.search(q='artist:' + artist, type='artist')
-            items = results['artists']['items']
-            if len(items) > 0:
-                artist_lu = items[0]
-                artist_img = artist_lu['images'][0]['url']
-                artist_db.artist_img = artist_img
-                db.session.commit()
-            else:
-                artist_img = None
-        else:
-            artist_img = artist_db.artist_img
-    else:
-        get_artist_spotify_uri(artist)
-        artist_img = get_artist_img(artist)
+    if artist_db is None:
+        artist = Artist(artist_name=artist,
+                        artist_spotify_id=artist_spotify_id,
+                        artist_songkick_id=artist_songkick_id,
+                        artist_img=artist_img)
+        db.session.add(artist)
+        db.session.commit()
 
-    return artist_img
 
 
 def get_related_artists(artist):
@@ -171,12 +203,14 @@ def get_related_artists(artist):
 
     related_artist_dict = {}
 
-    artist_uri = get_artist_spotify_uri(artist)
-    artist_img = get_artist_img(artist)
+    save_artist_to_db(artist)
+    artist_db = Artist.query.filter(Artist.artist_name == artist).first()
+    artist_spotify_id = artist_db.artist_spotify_id
+    artist_img = artist_db.artist_img
 
     #put all related artist info into dict, value is list -->
     #[identifier for relationship sequence, spotify URI, songkick URI or None for no event found]
-    related_artist_dict[artist] = {'spotify_uri': artist_uri,
+    related_artist_dict[artist] = {'spotify_uri': artist_spotify_id,
                                     'event': None,
                                     'img': artist_img}
 
@@ -191,70 +225,44 @@ def get_related_artists(artist):
             artist_img = 'https://pbs.twimg.com/profile_images/1324123785/macaroni_noodle_icom_-_web_taken_400x400.jpg'
         else:
             artist_img = artist['images'][0]['url']
-        related_artist_dict[artist_name] = {'spotify_uri': artist_uri, 'event': None, 'img': artist_img}
+        related_artist_dict[artist_name] = {'spotify_uri': artist_spotify_id, 'event': None, 'img': artist_img}
 
     return related_artist_dict
 
 
-def get_artist_songkick_id(artist):
-    """Get artist songkick id."""
 
-    artist_db = Artist.query.filter(Artist.artist_name == artist).first()
+def save_event_to_db(event_dict):
+    """Checks if event is in db, if not saves event to db."""
 
-    if artist_db is not None:
-        if artist_db.artist_songkick_id is None:
-            payload = {'query': artist, 'apikey': api_key}
-            artist_request = 'http://api.songkick.com/api/3.0/search/artists.json'
-            artist_id = requests.get(artist_request, params=payload)
-            jdict_artist = artist_id.json()
-            if 'artist' in jdict_artist['resultsPage']['results']:
-                artist_songkick_id = jdict_artist['resultsPage']['results']['artist'][0]['id']
-                artist_db.artist_songkick_id = artist_songkick_id
-                db.session.commit()
-        else:
-            artist_songkick_id = artist_db.artist_songkick_id
-    else:
-        get_artist_img(artist)
-        artist_songkick_id = get_artist_songkick_id(artist)
+    event_songkick_id = str(event_dict['event_id'])
+    event_name = event_dict['event_name_date']
+    city = event_dict['city']
+    lat = event_dict['lat']
+    lng = event_dict['lng']
+    performing_artist = event_dict['performing_artist']
+    event_songkick_link = event_dict['songkick_link']
+    event_datetime = event_dict['event_datetime']
 
-    return artist_songkick_id
+    event_db = Event.query.filter(Event.event_songkick_id == event_songkick_id).first()
+    artist_db = Artist.query.filter(Artist.artist_name == performing_artist).first()
 
-def get_event(artist, city):
-    """Get artist calendar, if event exists for artist and city save it to db."""
-
-    artist_db = Artist.query.filter(Artist.artist_name == artist).first()
+    if artist_db is None:
+        save_artist_to_db(performing_artist)
+        artist_db = Artist.query.filter(Artist.artist_name == performing_artist).first()
+        
     artist_id = artist_db.artist_id
 
-    event_db = Event.query.filter((Event.city == city) & (Event.artist_id == artist_id)).first()
-
     if event_db is None:
-        artist_songkick_id = get_artist_songkick_id(artist)
-        event_request = "http://api.songkick.com/api/3.0/artists/%s/calendar.json?apikey=%s" % (artist_songkick_id, api_key)
-        artist_calendar = requests.get(event_request)
-
-        jdict_events = artist_calendar.json()
-
-        if jdict_events['resultsPage']['totalEntries'] != 0:
-            list_of_events = jdict_events['resultsPage']['results']['event']
-
-        for event in list_of_events:
-            event_city = event['location']['city']
-            if city in event_city:
-                event_songkick_id = event['id']
-                event_name = event['displayName']
-                city = event['location']['city']
-                lat = event['location']['lat']
-                lng = event['location']['lng']
-                event_songkick_link = event['performance'][0]['artist']['uri']
-                artist_db = Artist.query.filter(Artist.artist_name == artist).first()
-                artist_id = artist_db.artist_id
-                event = Event(event_songkick_id=event_songkick_id, artist_id=artist_id, event_name=event_name, city=city, lat=lat, lng=lng, event_songkick_link=event_songkick_link)
-                db.session.add(event)
-                db.session.commit()
-
-    event_db = Event.query.filter((Event.city == city) & (Event.artist_id == artist_id)).first()
-
-    return event_db
+        event = Event(event_songkick_id=event_songkick_id,
+                    artist_id=artist_id,
+                    event_name=event_name,
+                    city=city,
+                    lat=lat,
+                    lng=lng,
+                    event_songkick_link=event_songkick_link,
+                    datetime=event_datetime)
+        db.session.add(event)
+        db.session.commit()
 
 
 
@@ -264,7 +272,6 @@ def check_for_events(artist, user_city):
     related_artist_dict = get_related_artists(artist)
 
     for artist, info in related_artist_dict.iteritems():
-
 
         payload = {'query': artist, 'apikey': api_key}
         artist_request = 'http://api.songkick.com/api/3.0/search/artists.json'
@@ -301,7 +308,18 @@ def check_for_events(artist, user_city):
                     city = event['location']['city']
                     lat = event['location']['lat']
                     lng = event['location']['lng']
+                    performing_artist = event['performance'][0]['displayName']
+                    event_datetime = event['start']['datetime']
                     songkick_link = event['performance'][0]['artist']['uri']
+                    events_info = {'event_id': event_id,
+                                   'performing_artist': performing_artist,
+                                   'event_name_date': event_name_date,
+                                   'city': city,
+                                   'lat': lat,
+                                   'lng': lng,
+                                   'songkick_link': songkick_link,
+                                   'event_datetime': event_datetime}
+                    save_event_to_db(events_info)
                     related_artist_dict[artist]['event'] = {'id': event_id,
                                                             'event_name': event_name_date,
                                                             'city': city,
@@ -310,6 +328,8 @@ def check_for_events(artist, user_city):
                                                             'songkick_link': songkick_link}
 
     return related_artist_dict
+
+
 
 
 if __name__ == "__main__":

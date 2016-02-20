@@ -26,6 +26,8 @@
 
     <h3>My Saved Shows</h3>
 
+    <div class="user-saved-shows"></div>
+
     <p></p>
     <p></p>
 
@@ -34,8 +36,6 @@
 <script>
 
 function showEvents(result) {
-
-    console.log(result);
  
     $(".related-artists-imgs").remove();
     $(".event").remove(); 
@@ -61,16 +61,29 @@ function showEvents(result) {
             var event_city = result.events[i][1]['city'];
             var songkick_link = result.events[i][1]['songkick_link'];
 
-            var events = [event_name, event_city, songkick_link]
+            var eventContainer = $("<div class='event'></div>"); 
 
-            $("#event-results").append("<p class='event' id='eventname'>"+events[0]+"</p>");
-            $("#event-results").append("<p class='event'>"+events[1]+"</p>");
-            $("#event-results").append("<a href="+events[2]+" class='event'>Buy Tickets</a>");
-            $("#event-results").append("<p class='event'>---------------------------------------------------</p>");
+            var saveButton = $("<button></button>"); 
+            saveButton.text("Save Show");
+            saveButton.click(function(link) {
+                return function(evt) {
+                    saveShow();
+                    console.log(link);
+                };
+            }(songkick_link));
+
+            eventContainer.append("<p id='eventname'>"+event_name+"</p>");
+            eventContainer.append("<p>"+event_city+"</p>");
+            eventContainer.append("<a href="+songkick_link+">Buy Tickets</a>");
+            eventContainer.append(saveButton);
+            eventContainer.append("<hr/>");
+
+            $("#event-results").append(eventContainer);
 
 
         
      }
+
 
      for (i=0; i< result.related_artist_names_imgs.length; i++) {
 
@@ -79,11 +92,8 @@ function showEvents(result) {
       }
 
       $('.related-artists-imgs').click(function(evt) {
-
-                console.log(evt); 
-                console.log(evt.target.id); 
-                var artist_name = evt.target.id.replace(/[_-]/g, " ");
-                console.log(artist_name); 
+ 
+                var artist_name = evt.target.id.replace(/[_-]/g, " "); 
                 $("#artist").val(artist_name)
                 $("#city").val(); 
                 alert("Hey this is gonna take a while.. sorry :(");
@@ -91,7 +101,6 @@ function showEvents(result) {
         });
     
     }; 
-
 
 
 function getFormInputs(evt) {
@@ -114,6 +123,19 @@ function findEvents(artist, city) {
         showEvents);
 
 };
+
+// function saveShow(evt) {
+
+
+
+//     $.get("/saved-shows.json",
+//         )
+// }
+
+// function showUserSavedEvents(result) {
+
+
+// }
 
 $('#search-shows').click(getFormInputs);
 
