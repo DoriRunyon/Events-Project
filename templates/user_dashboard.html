@@ -25,9 +25,22 @@
         <div class="related-artists"></div>
     </div>
 
+    <p></p>
+    <p></p>
+    <p></p>
+    <p></p>
+
     <h3>My Saved Shows</h3>
 
     <div class="user-saved-shows"></div>
+
+    <div>
+
+            {% for event in events_list %}
+                <div id="saved_event">{{ event }}</div>
+            {% endfor %}
+
+      </div>
 
     <p></p>
     <p></p>

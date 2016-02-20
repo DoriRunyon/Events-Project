@@ -21,3 +21,15 @@
 
 }
 
+#saved_event {
+
+    font-size: 15px;
+    width: 200px;
+    height: 150px;
+    border: 1px solid gray;
+    float: left;
+    margin-left: 10px;
+
+}
+
+

@@ -1,8 +1,6 @@
 import spotipy, requests, os
-
 from jinja2 import StrictUndefined
 from pprint import pprint
-
 from flask import Flask, render_template, redirect, request, flash, session, url_for, jsonify
 from flask_debugtoolbar import DebugToolbarExtension
 from model import connect_to_db, db, User, Artist, Event, UserEvent
@@ -92,9 +90,19 @@ def user_dashboard(user_id):
     events = ""
     artist = ""
 
+    user_saved_events = UserEvent.query.filter(UserEvent.user_id == user_id).all()
+    events_list = []
+
+    for event in user_saved_events:
+        event_id = event.event_id
+        event_info = Event.query.filter(Event.event_id == event_id).first()
+        event_name = event_info.event_name
+        events_list.append(event_name)
+
     return render_template("user_dashboard.html",
                             events=events,
                             artist=artist,
+                            events_list=events_list,
                             user_id=user_id)
 
 @app.route('/dashboard')
