@@ -112,7 +112,7 @@ function showUserSavedEvents(result) {
         alert("You saved: "+eventName);
 
         var savedEvent = $("<div class='saved-event'></div>");
-        savedEvent.append("<p id="+event_name+"</p>");
+        savedEvent.append("<p>"+eventName+"</p>");
 
         $("#user-saved-shows").append(savedEvent);
 
