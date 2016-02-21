@@ -111,10 +111,14 @@ function showUserSavedEvents(result) {
         var eventName = result.event_name;
         alert("You saved: "+eventName);
 
-        var savedEvent = $("<div class='saved-event'></div>");
-        savedEvent.append("<p>"+eventName+"</p>");
+        ///commenting the below code out for now, wanted to have shows appear in saved shows area immediately after 
+        ///hitting save button (rather than having to refresh page) - but formatting is off, "you already saved this" message
+        ///is appearing as a 'saved show'
 
-        $("#user-saved-shows").append(savedEvent);
+        // var savedEvent = $("<div class='saved-event'></div>");
+        // savedEvent.append("<p>"+eventName+"</p>");
+
+        // $("#user-saved-shows").append(savedEvent);
 
 }
 

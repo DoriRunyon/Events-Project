@@ -119,7 +119,10 @@ def user_dashboard(user_id):
         event_id = event.event_id
         event_info = Event.query.filter(Event.event_id == event_id).first()
         event_name = event_info.event_name
-        events_list.append(event_name)
+        event_date = event_info.datetime
+        events_list.append([event_date, event_name])
+
+    events_list = sorted(events_list)
 
     return render_template("user_dashboard.html",
                             events=events,

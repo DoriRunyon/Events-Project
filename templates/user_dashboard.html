@@ -36,7 +36,9 @@
     <div id="user-saved-shows">
 
             {% for event in events_list %}
-                <div class="saved_event">{{ event }}</div>
+                <div class="saved_event">
+                    <p>{{ event[1] }}</p>
+                </div>
             {% endfor %}
 
       </div>
