@@ -82,6 +82,28 @@ def create_new_user():
 
     return redirect("/")
 
+@app.route("/save-show.json")
+def save_show():
+    """Look up show using songkick link, save show for user."""
+
+    event_songkick_id = request.args.get("event_songkick_id")
+    event = Event.query.filter(Event.event_songkick_id == event_songkick_id).first()
+
+    event_id = event.event_id
+    event_name = event.event_name
+    user_id = session.get("user")
+
+    event = UserEvent.query.filter((UserEvent.user_id == user_id) & (UserEvent.event_id == event_id)).first()
+
+    if event is not None:
+        event_name = "You already saved this one silly!"
+    else:
+        saved_show = UserEvent(event_id=event_id, user_id=user_id)
+        db.session.add(saved_show)
+        db.session.commit()
+
+    return jsonify({'event_name': event_name})
+
 
 @app.route('/dashboard/<int:user_id>')
 def user_dashboard(user_id):
@@ -145,13 +167,6 @@ def search_for_shows():
 
     return jsonify(results)
 
-
-
-def save_shows():
-
-    if 'user' in session:
-        print session['user'], "LOOK HERE"
-    
 
 
 def get_artist_spotify_uri(artist):
