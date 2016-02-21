@@ -5,6 +5,7 @@ from flask import Flask, render_template, redirect, request, flash, session, url
 from flask_debugtoolbar import DebugToolbarExtension
 from model import connect_to_db, db, User, Artist, Event, UserEvent
 from werkzeug.contrib.cache import SimpleCache
+from datetime import datetime
 
 
 api_key = os.environ['SONGKICK_API_KEY']
@@ -73,7 +74,6 @@ def create_new_user():
     password = request.form.get("password")
 
     user = User.query.filter(User.email == email).first()
-    print user
 
     if user == None:
         user = User(email=email, password=password)
@@ -112,20 +112,21 @@ def user_dashboard(user_id):
     events = ""
     artist = ""
 
-    print "User ID:", user_id 
+    today = datetime.utcnow()
+    print today
 
     user_saved_events = UserEvent.query.filter(UserEvent.user_id == user_id).all()
-    print "LOOOK HERE***********************************", user_saved_events
     events_list = []
 
     for event in user_saved_events:
         event_id = event.event_id
         event_info = Event.query.filter(Event.event_id == event_id).first()
-        event_name = event_info.event_name
         event_date = event_info.datetime
-        events_list.append([event_date, event_name])
+        if event_date > today:
+            event_name = event_info.event_name
+            event_date = event_info.datetime
+            events_list.append([event_date, event_name])
 
-    print events_list
     events_list = sorted(events_list)
 
     return render_template("user_dashboard.html",
