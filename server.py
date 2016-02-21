@@ -112,7 +112,10 @@ def user_dashboard(user_id):
     events = ""
     artist = ""
 
+    print "User ID:", user_id 
+
     user_saved_events = UserEvent.query.filter(UserEvent.user_id == user_id).all()
+    print "LOOOK HERE***********************************", user_saved_events
     events_list = []
 
     for event in user_saved_events:
@@ -122,6 +125,7 @@ def user_dashboard(user_id):
         event_date = event_info.datetime
         events_list.append([event_date, event_name])
 
+    print events_list
     events_list = sorted(events_list)
 
     return render_template("user_dashboard.html",
@@ -317,7 +321,7 @@ def check_for_events(artist, user_city):
         artist_request = 'http://api.songkick.com/api/3.0/search/artists.json'
 
         artist_id = cache.get(artist)
-        print artist_id, "HEY@@"
+
         if artist_id is None:
             artist_id = requests.get(artist_request, params=payload)
             cache.set(artist, artist_id, timeout=24 * 60 * 60)
@@ -328,6 +332,8 @@ def check_for_events(artist, user_city):
             artist_songkick_id = jdict_artist['resultsPage']['results']['artist'][0]['id']
 
             event_request = "http://api.songkick.com/api/3.0/artists/%s/calendar.json?apikey=%s" % (artist_songkick_id, api_key)
+
+
             artist_calendar = cache.get(artist_songkick_id)
             if artist_calendar is None:
                 artist_calendar = requests.get(event_request)
@@ -343,6 +349,7 @@ def check_for_events(artist, user_city):
             for event in list_of_events:
                 city = event['location']['city']
                 if user_city in city:
+                    pprint(event)
                     event_id = event['id']
                     event_name_date = event['displayName']
                     city = event['location']['city']
@@ -350,15 +357,10 @@ def check_for_events(artist, user_city):
                     lng = event['location']['lng']
                     performing_artist = event['performance'][0]['displayName']
                     event_datetime = event['start']['datetime']
+                    if event_datetime is None:
+                        event_datetime = event['start']['date']
                     songkick_link = event['performance'][0]['artist']['uri']
-                    events_info = {'event_id': event_id,
-                                   'performing_artist': performing_artist,
-                                   'event_name_date': event_name_date,
-                                   'city': city,
-                                   'lat': lat,
-                                   'lng': lng,
-                                   'songkick_link': songkick_link,
-                                   'event_datetime': event_datetime}
+                    events_info = create_events_info_dict(event_id, event_name_date, city, lat, lng, performing_artist, event_datetime, songkick_link)
                     save_event_to_db(events_info)
                     related_artist_dict[artist]['event'] = {'id': event_id,
                                                             'event_name': event_name_date,
@@ -370,7 +372,47 @@ def check_for_events(artist, user_city):
     return related_artist_dict
 
 
+# def check_db_for_event(artist, city):
+#     """Check db for events when given artist and city."""
 
+#     artist_record = Artist.query.filter(Artist.artist_name == artist).first()
+#     if artist_record is None:
+#         save_artist_to_db(artist)
+#         artist_record = Artist.query.filter(Artist.artist_name == artist).first()
+
+#     artist_id = artist_record.artist_id
+#     event = Event.query.filter((Event.city == city) & (Event.artist_id == artist_id)).first()
+  
+#     if event is not None:
+#         event_id = event.event_id
+#         performing_artist = event.performing_artist
+#         event_name_date = event.event_name
+#         lat = event.lat
+#         lng = event.lng
+#         songkick_link = event.songkick_link
+#         event_datetime = event.datetime
+#         events_info = create_events_info_dict(event_id, event_name_date, city, lat, lng, performing_artist, event_datetime, songkick_link)
+#     else:
+#         events_info = None
+
+#     return events_info
+
+
+
+def create_events_info_dict(event_id, event_name_date, city, lat, lng, performing_artist, event_datetime, songkick_link):
+    """Creates a dictionary of event information."""
+
+
+    events_info = {'event_id': event_id,
+                   'performing_artist': performing_artist,
+                   'event_name_date': event_name_date,
+                   'city': city,
+                   'lat': lat,
+                   'lng': lng,
+                   'songkick_link': songkick_link,
+                   'event_datetime': event_datetime}
+
+    return events_info
 
 if __name__ == "__main__":
     # We have to set debug=True here, since it has to be True at the point
