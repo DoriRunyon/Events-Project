@@ -2,6 +2,7 @@ import spotipy, requests, os
 from jinja2 import StrictUndefined
 from pprint import pprint
 from flask import Flask, render_template, redirect, request, flash, session, url_for, jsonify
+from flask.ext.triangle import Triangle
 from flask_debugtoolbar import DebugToolbarExtension
 from model import connect_to_db, db, User, Artist, Event, UserEvent
 from werkzeug.contrib.cache import SimpleCache
@@ -9,6 +10,7 @@ from datetime import datetime
 
 
 api_key = os.environ['SONGKICK_API_KEY']
+google_maps_api_key = os.environ['GOOGLE_MAPS_API_KEY']
 
 
 spotify = spotipy.Spotify()
@@ -17,6 +19,7 @@ cache = SimpleCache()
 spotify = spotipy.Spotify()
 
 app = Flask(__name__)
+Triangle(app)
 cache = SimpleCache()
 
 app.secret_key = "ABC"
@@ -113,7 +116,6 @@ def user_dashboard(user_id):
     artist = ""
 
     today = datetime.utcnow()
-    print today
 
     user_saved_events = UserEvent.query.filter(UserEvent.user_id == user_id).all()
     events_list = []

@@ -1,10 +1,9 @@
 <!doctype html>
-<html>
+<html  ng-app="myApp">
 <head>
   <title>Broadcast</title>
 
   <link rel="stylesheet" type="text/css" href="/static/style.css">
-
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
 
   
@@ -12,11 +11,17 @@
 
 <body>
 
-  <nav class="navbar navbar-default">
+     
+      <script src="http://code.jquery.com/jquery.js"></script>
+      <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.5/angular.min.js"></script>
+      <script src="https://maps.googleapis.com/maps/api/js"></script>
+
+     <nav class="navbar navbar-default">
 
     <div class="container-fluid">
       <div class="navbar-header">
         <div id="navbar">
+        
    {% if 'user' not in session %} 
 
                <ul class="nav navbar-nav">
@@ -38,6 +43,7 @@
                 {% endif %}
                 </ul>
 
+
               </div>
           </div>
       </div>
@@ -49,13 +55,9 @@
                 {% endfor %}
               </ul>
 
-    <script src="http://code.jquery.com/jquery.js"></script>
-
-     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
-
 
   {% block content %} put your content here {% endblock %}
 
-
+ <script type="text/javascript" src="/static/js/dashboard.js"></script>
 </body>
 </html>

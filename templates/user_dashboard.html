@@ -1,9 +1,12 @@
 {% extends 'base.html' %}
 {% block content %}
 
-    <h2>Welcome, user ID No. "<span style="color: pink">{{ user_id }}</span>"</h2>
 
-    <h3>Enter an artist and city</h3>
+    <h2>Welcome to <span style="font-weight: bold; font-size: 40px">Broadcast</span></h2>
+
+<!--    <div ng-app="myApp" ng-controller="MainController"><h1>{[ playlist ]}</h1><h1>{[ test ]}</h1></div> -->
+
+    <h3>Enter an artist and city to search for concerts</h3>
     <form> 
         Artist <input type="text" name="artist" id="artist">
         <p></p>
@@ -41,14 +44,15 @@
                 </div>
             {% endfor %}
 
-      </div>
+    </div>
 
     <p></p>
     <p></p>
 
-    <script src="http://code.jquery.com/jquery.js"></script>
-    <script type="text/javascript" src="../static/dashboard.js"></script>
 
+    <div class="map-view">
 
+    <div id="map"></div>
+    </div>
 
 {% endblock %}
