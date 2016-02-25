@@ -13,7 +13,7 @@
 
      
       <script src="http://code.jquery.com/jquery.js"></script>
-      <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.5/angular.min.js"></script>
+
       <script src="https://maps.googleapis.com/maps/api/js"></script>
 
      <nav class="navbar navbar-default">
@@ -59,11 +59,6 @@
   {% block content %} put your content here {% endblock %}
 
   <script type="text/javascript">
-
-           function test_func(data) {
-                  console.log(data);
-              }
-
           var locations = ({{ data|safe }});
   </script>
   <script type="text/javascript" src="/static/js/dashboard.js"></script>

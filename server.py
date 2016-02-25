@@ -131,11 +131,11 @@ def user_dashboard(user_id):
         if event_date > today:
             event_name = event_info.event_name
             event_date = event_info.datetime
+            events_list.append([event_date, event_name])
             event_lng = event_info.lng
             event_lat = event_info.lat
             event_latlng = [event_lat, event_lng]
             event_locations.append(event_latlng)
-            events_list.append([event_date, event_name])
 
     events_list = sorted(events_list)
 
