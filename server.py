@@ -2,28 +2,21 @@ import spotipy, requests, os
 from jinja2 import StrictUndefined
 from pprint import pprint
 from flask import Flask, render_template, redirect, request, flash, session, url_for, jsonify
-from flask.ext.triangle import Triangle
 from flask_debugtoolbar import DebugToolbarExtension
 from model import connect_to_db, db, User, Artist, Event, UserEvent
 from werkzeug.contrib.cache import SimpleCache
 from datetime import datetime
+import json
 
 
 api_key = os.environ['SONGKICK_API_KEY']
 google_maps_api_key = os.environ['GOOGLE_MAPS_API_KEY']
-
-
-spotify = spotipy.Spotify()
 cache = SimpleCache()
-
 spotify = spotipy.Spotify()
 
 app = Flask(__name__)
-Triangle(app)
-cache = SimpleCache()
 
 app.secret_key = "ABC"
-
 app.jinja_env.undefined = StrictUndefined
 
 
@@ -107,6 +100,16 @@ def save_show():
 
     return jsonify({'event_name': event_name})
 
+# def my_map(markers_string):
+#     """Gets Google map url, puts markers on map."""
+
+#     markers = markers_string
+#     my_map = "http://maps.googleapis.com/maps/api/staticmap?size=500x300&style=element:labels|visibility:off&style=element:geometry.stroke|visibility:off&style=feature:landscape|element:geometry|saturation:-100&style=feature:water|saturation:-100|invert_lightness:true&markers=%s&key=%s" % (markers, google_maps_api_key)
+#     # my_map = {"my_map": my_map}
+#     # print my_map
+
+#     return my_map
+
 
 @app.route('/dashboard/<int:user_id>')
 def user_dashboard(user_id):
@@ -119,6 +122,7 @@ def user_dashboard(user_id):
 
     user_saved_events = UserEvent.query.filter(UserEvent.user_id == user_id).all()
     events_list = []
+    event_locations = []
 
     for event in user_saved_events:
         event_id = event.event_id
@@ -127,6 +131,10 @@ def user_dashboard(user_id):
         if event_date > today:
             event_name = event_info.event_name
             event_date = event_info.datetime
+            event_lng = event_info.lng
+            event_lat = event_info.lat
+            event_latlng = [event_lat, event_lng]
+            event_locations.append(event_latlng)
             events_list.append([event_date, event_name])
 
     events_list = sorted(events_list)
@@ -135,7 +143,8 @@ def user_dashboard(user_id):
                             events=events,
                             artist=artist,
                             events_list=events_list,
-                            user_id=user_id)
+                            user_id=user_id,
+                            data=json.dumps(event_locations))
 
 @app.route('/dashboard')
 def dashboard():
@@ -352,7 +361,6 @@ def check_for_events(artist, user_city):
             for event in list_of_events:
                 city = event['location']['city']
                 if user_city in city:
-                    pprint(event)
                     event_id = event['id']
                     event_name_date = event['displayName']
                     city = event['location']['city']
@@ -416,6 +424,9 @@ def create_events_info_dict(event_id, event_name_date, city, lat, lng, performin
                    'event_datetime': event_datetime}
 
     return events_info
+
+
+
 
 if __name__ == "__main__":
     # We have to set debug=True here, since it has to be True at the point
