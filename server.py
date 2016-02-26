@@ -7,7 +7,7 @@ from model import connect_to_db, db, User, Artist, Event, UserEvent
 from werkzeug.contrib.cache import SimpleCache
 from datetime import datetime
 import json
-
+from operator import itemgetter, attrgetter
 
 api_key = os.environ['SONGKICK_API_KEY']
 google_maps_api_key = os.environ['GOOGLE_MAPS_API_KEY']
@@ -100,16 +100,36 @@ def save_show():
 
     return jsonify({'event_name': event_name})
 
-# def my_map(markers_string):
-#     """Gets Google map url, puts markers on map."""
 
-#     markers = markers_string
-#     my_map = "http://maps.googleapis.com/maps/api/staticmap?size=500x300&style=element:labels|visibility:off&style=element:geometry.stroke|visibility:off&style=feature:landscape|element:geometry|saturation:-100&style=feature:water|saturation:-100|invert_lightness:true&markers=%s&key=%s" % (markers, google_maps_api_key)
-#     # my_map = {"my_map": my_map}
-#     # print my_map
+def sort_events_by_location_date(event_locations):
+    """Sorts an event list by location and if there are duplicates, keeps only the event with the closest date.
 
-#     return my_map
+    >>> [sort_events_by_location_date([[(1, 2), "2016-04-23 20:00:00", "event name"], [(5, 2), "2016-04-23 20:00:00", "event name"], [(1, 6), "2016-04-23 20:00:00", "event name"], [(1, 2), "2016-04-26 20:00:00", "event name"]])]
+    [[[1, 2, 'event name'], [1, 6, 'event name'], [5, 2, 'event name']]]
+    """
 
+    event_locations_dict = {}
+    event_locations_new = []
+
+    for event in event_locations:
+        event_datetime = event[1]
+        if event[0] in event_locations_dict:
+            stuff = event_locations_dict[event[0]][0]
+            if event_datetime < event_locations_dict[event[0]][0]:
+                event_locations_dict[event[0]] = [event_datetime, event[2]]
+        else:
+            event_locations_dict[event[0]] = [event_datetime, event[2]]
+
+    for key, value in event_locations_dict.iteritems():
+        lat = key[0]
+        lng = key[1]
+        event_name = value[1]
+        event = [lat, lng, event_name]
+        event_locations_new.append(event)
+
+
+    print event_locations_new
+    return event_locations_new
 
 @app.route('/dashboard/<int:user_id>')
 def user_dashboard(user_id):
@@ -122,7 +142,7 @@ def user_dashboard(user_id):
 
     user_saved_events = UserEvent.query.filter(UserEvent.user_id == user_id).all()
     events_list = []
-    event_locations = []
+    event_locations_unsorted = []
 
     for event in user_saved_events:
         event_id = event.event_id
@@ -134,10 +154,12 @@ def user_dashboard(user_id):
             events_list.append([event_date, event_name])
             event_lng = event_info.lng
             event_lat = event_info.lat
-            event_latlng = [event_lat, event_lng]
-            event_locations.append(event_latlng)
+            event_latlng = [(event_lat, event_lng), event_date, event_name]
+            event_locations_unsorted.append(event_latlng)
 
     events_list = sorted(events_list)
+    event_locations = sort_events_by_location_date(event_locations_unsorted)
+    print event_locations
 
     return render_template("user_dashboard.html",
                             events=events,
@@ -439,3 +461,6 @@ if __name__ == "__main__":
     DebugToolbarExtension(app)
 
     app.run()
+
+    import doctest
+    doctest.testmod()

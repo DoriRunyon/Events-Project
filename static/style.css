@@ -49,5 +49,16 @@
  
 }
 
+.playlist {
+    float: left;
+    clear: both;
+
+}
+
+
+.main {
+
+    margin: 20px;
+}
 
 

@@ -10,7 +10,29 @@
 # spotify = spotipy.Spotify()
 # cache = SimpleCache()
 
+from datetime import datetime, date
 
+def sort_events_by_location_date(event_locations):
+    """Sorts an event list by location and if there are duplicates, keeps only the event with the closest date.
+
+    >>> [sort_events_by_location_date([[1, 2, 2016-04-23 20:00:00], [5, 2, 2016-04-23 20:00:00], [1, 6, 2016-04-23 20:00:00], [1, 2, 2016-04-26 20:00:00]])]
+    [[1, 2, 2016-04-23 20:00:00], [5, 2, 2016-04-23 20:00:00], [1, 6, 2016-04-23 20:00:00]]
+    """
+
+    sorted_events = sorted(event_locations)
+    for event in sorted_events:
+        event[3] = datetime.datetime.strptime(event[3], "%Y-%m-%d %H:%M:%S.%f")
+        print event[3]
+
+    for event in range(len(event_locations)-1):
+        i = 1
+        if event[0][1] == event_locations[i][0][1]:
+            if event[3] > event_locations[i][3]:
+                print event
+                sorted_events.remove(event)
+        i += 1
+
+    return sorted_events
 
 # def get_artist_spotify_uri(artist):
 #     """Search for artist in database, if not there, get spotify URI and save artist to db."""

@@ -55,12 +55,10 @@
                 {% endfor %}
               </ul>
 
-
+  <div class="main">
   {% block content %} put your content here {% endblock %}
+  </div>
 
-  <script type="text/javascript">
-          var locations = ({{ data|safe }});
-  </script>
   <script type="text/javascript" src="/static/js/dashboard.js"></script>
 
 </body>

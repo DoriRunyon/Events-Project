@@ -146,30 +146,47 @@ function initMap() {
 
             position: myLatLng,
             map: map,
-            title: 'Hello World!'
-});
+            title: 'Center.'
+ });
+
+        var infoWindow = new google.maps.InfoWindow({
+                content: "holding..."
+            });
 
         for (i=0; i< locations.length; i++) {
 
             var marker_lat = parseFloat(locations[i][0]);
             var marker_lng = parseFloat(locations[i][1]);
+            var eventInfo = locations[i][2];
+            eventInfo = '<p>' + eventInfo + '</p>';
+
 
             var position = new google.maps.LatLng(marker_lat, marker_lng);
-            var markerTitle = toString(i);
             var marker = new google.maps.Marker({
                 position: position,
                 map: map,
-                title: markerTitle,
+                title: eventInfo,
+                info: eventInfo,
+                icon: '/static/images/music_rock.png'
 
             });
-            console.log(marker);
+            google.maps.event.addListener(marker, 'click', function () {
+                infoWindow.setContent(this.info);
+                infoWindow.open(map, this);
+            });
     }
+
+}
+
+function createPlaylist() {
+
+    alert("I work!");
 }
 
 google.maps.event.addDomListener(window, 'load', initMap);
 
 $('#search-shows').click(getFormInputs);
-
+$('#create-playlist').click(createPlaylist);
 
 
 
