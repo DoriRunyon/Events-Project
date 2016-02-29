@@ -8,6 +8,7 @@ from werkzeug.contrib.cache import SimpleCache
 from datetime import datetime
 import json
 from operator import itemgetter, attrgetter
+from random import choice
 
 api_key = os.environ['SONGKICK_API_KEY']
 google_maps_api_key = os.environ['GOOGLE_MAPS_API_KEY']
@@ -127,8 +128,6 @@ def sort_events_by_location_date(event_locations):
         event = [lat, lng, event_name]
         event_locations_new.append(event)
 
-
-    print event_locations_new
     return event_locations_new
 
 @app.route('/dashboard/<int:user_id>')
@@ -159,7 +158,6 @@ def user_dashboard(user_id):
 
     events_list = sorted(events_list)
     event_locations = sort_events_by_location_date(event_locations_unsorted)
-    print event_locations
 
     return render_template("user_dashboard.html",
                             events=events,
@@ -446,6 +444,37 @@ def create_events_info_dict(event_id, event_name_date, city, lat, lng, performin
                    'event_datetime': event_datetime}
 
     return events_info
+
+
+def get_tracks_for_artist(artist):
+    """Gets artists top tracks. Tracks come from most popular list according to Spotify."""
+
+
+    artist_spotify_uri = get_artist_spotify_uri(artist)
+    tracks = spotify.artist_top_tracks(artist_spotify_uri, country='US')
+    tracks_list = []
+
+    for track in tracks['tracks']:
+        track_id = track['album']['id']
+        track_name = track['album']['name']
+        track = (track_id, track_name)
+        tracks_list.append(track)
+
+    tracks_list = set(tracks_list)
+    tracks_list = list(tracks_list)
+
+    return tracks_list
+
+def create_playlist_for_artists(artist_list):
+    """Creates a playlist for a given list of artists"""
+
+    playlist = []
+
+    for artist in artist_list:
+        tracks = get_tracks_for_artist(artist)
+        playlist.append(tracks[0:3])
+
+    return playlist
 
 
 

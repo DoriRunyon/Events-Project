@@ -1,4 +1,4 @@
-"""Models and database functions for Noodle."""
+"""Models and database functions for Broadcast."""
 
 from flask_sqlalchemy import SQLAlchemy
 
@@ -67,7 +67,7 @@ class Event(db.Model):
 
 
 class Artist(db.Model):
-    """Table for generating playlist based on saved events."""
+    """Table for artist info."""
 
     __tablename__ = "artists"
 
@@ -84,6 +84,49 @@ class Artist(db.Model):
                                                          self.artist_name)
 
 
+class Playlist(db.Model):
+    """Table for generating playlist based on user saved events."""
+
+    __tablename__ = "playlists"
+
+    playlist_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    playlist_spotify_id = db.Column(db.String(100), nullable=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=False)
+    playlist_name = db.Column(db.String(100), nullable=True)
+
+    user = db.relationship('User', backref=db.backref("users"))
+
+    def __repr__(self):
+        """Provide helpful representation when printed."""
+
+        return "<Event playlist_id=%s playlist_name =%s>" % (self.playlist_id,
+                                                             self.playlist_name)
+
+
+class PlaylistTracks(db.Model):
+    """Association table for playlists user has created."""
+
+    __tablename__ = "playlist_tracks"
+
+    playlist_track_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    playlist_id = db.Column(db.Integer, db.ForeignKey('playlists.playlist_id'), nullable=False)
+    track_id = db.Column(db.Integer, db.ForeignKey('tracks.track_id'), nullable=False)
+
+
+class Track(db.Model):
+    """Table for tracks saved by users to create a playlist."""
+
+    __tablename__ = "tracks"
+
+    track_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    track_name = db.Column(db.String(100), nullable=True)
+    track_spotify_id = db.Column(db.String(100), nullable=True)
+
+    def __repr__(self):
+        """Provide helpful representation when printed."""
+
+        return "<Event track_id=%s track_name =%s>" % (self.track_id,
+                                                       self.track_name)
 
 
 def connect_to_db(app):
