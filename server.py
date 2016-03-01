@@ -38,16 +38,19 @@ def logged_in():
 
     user = User.query.filter(User.email == email).first()
 
-    if user.password == password:
+    if user == None:
+        flash("Incorrect email or password, please try again.")
+        return redirect('/dashboard')
+
+    elif user.password == password:
         user_id = user.user_id
         session['user'] = user_id
-        print user_id
-        print type(user_id)
         flash(("Hello %s, you are now logged in.") % email)
         return redirect(('/dashboard/%d') % (user_id))
 
     else:
-        return "Incorrect password. <a href='/dashboard'>Try again.</a>"
+        flash("Incorrect email or password, please try again.")
+        return redirect('/dashboard')
 
 @app.route('/log-out')
 def logout():
@@ -407,32 +410,6 @@ def check_for_events(artist, user_city):
                                                             'songkick_link': songkick_link}
 
     return related_artist_dict
-
-
-# def check_db_for_event(artist, city):
-#     """Check db for events when given artist and city."""
-
-#     artist_record = Artist.query.filter(Artist.artist_name == artist).first()
-#     if artist_record is None:
-#         save_artist_to_db(artist)
-#         artist_record = Artist.query.filter(Artist.artist_name == artist).first()
-
-#     artist_id = artist_record.artist_id
-#     event = Event.query.filter((Event.city == city) & (Event.artist_id == artist_id)).first()
-  
-#     if event is not None:
-#         event_id = event.event_id
-#         performing_artist = event.performing_artist
-#         event_name_date = event.event_name
-#         lat = event.lat
-#         lng = event.lng
-#         songkick_link = event.songkick_link
-#         event_datetime = event.datetime
-#         events_info = create_events_info_dict(event_id, event_name_date, city, lat, lng, performing_artist, event_datetime, songkick_link)
-#     else:
-#         events_info = None
-
-#     return events_info
 
 
 

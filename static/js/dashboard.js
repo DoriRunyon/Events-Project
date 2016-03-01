@@ -35,13 +35,6 @@ function showEvents(result) {
             var saveButton = $("<button id="+event_songkick_id+"></button>");
             saveButton.text("Save Show");
             $(saveButton).click(saveShow);
-       
-            // saveButton.click(function(link) {
-            //     return function(evt) {
-            //         saveShow();
-            //         console.log(link);
-            //     };
-            // }(songkick_link));
 
             eventContainer.append("<p id='eventname'>"+event_name+"</p>");
             eventContainer.append("<p>"+event_city+"</p>");
@@ -112,28 +105,15 @@ function showUserSavedEvents(result) {
         var eventName = result.event_name;
         alert("You saved: "+eventName);
 
-        ///commenting the below code out for now, wanted to have shows appear in saved shows area immediately after 
-        ///hitting save button (rather than having to refresh page) - but formatting is off, "you already saved this" message
-        ///is appearing as a 'saved show'
-
-        // var savedEvent = $("<div class='saved-event'></div>");
-        // savedEvent.append("<p>"+eventName+"</p>");
-
-        // $("#user-saved-shows").append(savedEvent);
-
 }
 
 
 
 function initMap() {
 
-    // Specify where the map is centered
-
     var myLatLng = {lat: 40.7306, lng: -73.935242};
     var bounds = new google.maps.LatLngBounds();
 
-    // Create a map object and specify the DOM element for display.
-    // center and zoom are required.
     var map = new google.maps.Map(document.getElementById('map'), {
         center: myLatLng,
         zoom: 2,
@@ -177,7 +157,6 @@ function initMap() {
 
 function showPlaylist(result) {
 
-    // $("#playlists").remove();
 
     var playlistName = result.playlistName;
     console.log(playlistName);
