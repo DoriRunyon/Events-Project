@@ -46,6 +46,8 @@
 
     </div>
 
+    <div id="dialog"></div>
+
     <div class="playlist">
     <button id="create-playlist">Create Playlist</button><p>Create a playlist based on your saved shows.</p>
     </div>
@@ -58,8 +60,11 @@
     <div id="map"></div>
     </div>
 
+    <div id="playlists"></div>
+
 <script type="text/javascript">
           var locations = ({{ data|safe }});
+          var performingArtists = ({{ performing_artists|safe }});
   </script>
 
 {% endblock %}

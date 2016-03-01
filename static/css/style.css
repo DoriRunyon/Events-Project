@@ -26,15 +26,45 @@
     font-size: 15px;
     font-weight: bold;  
     width: 200px;
-    height: 100px;
-    border: 1px dotted #009ACD;
+    height: 125px;
     float: left;
     margin-left: 10px;
     margin: 10px;
-    color: #FFFF33;
-    background-color: #009ACD;
+    color: black;
+    background-color: #eeeeee;
     padding: 10px;
+    border-radius: 25px;
 
 }
 
+.map-view {
+    float: left;
+    clear: both;
+}
+
+#map {
+
+    width: 500px;
+    height: 300px;
+ 
+}
+
+.playlist {
+    float: left;
+    clear: both;
+
+}
+
+
+.main {
+
+    margin: 20px;
+}
+
+#playlists {
+
+    float: left;
+    clear: both;
+
+}
 

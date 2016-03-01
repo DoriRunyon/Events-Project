@@ -130,6 +130,7 @@ def sort_events_by_location_date(event_locations):
 
     return event_locations_new
 
+
 @app.route('/dashboard/<int:user_id>')
 def user_dashboard(user_id):
     """Dashboard for user, can search shows and see saved shows and playlists."""
@@ -142,6 +143,7 @@ def user_dashboard(user_id):
     user_saved_events = UserEvent.query.filter(UserEvent.user_id == user_id).all()
     events_list = []
     event_locations_unsorted = []
+    performing_artists = []
 
     for event in user_saved_events:
         event_id = event.event_id
@@ -150,6 +152,8 @@ def user_dashboard(user_id):
         if event_date > today:
             event_name = event_info.event_name
             event_date = event_info.datetime
+            artist = Artist.query.filter(Artist.artist_id == event_info.artist_id).first()
+            performing_artists.append(artist.artist_name)
             events_list.append([event_date, event_name])
             event_lng = event_info.lng
             event_lat = event_info.lat
@@ -158,13 +162,15 @@ def user_dashboard(user_id):
 
     events_list = sorted(events_list)
     event_locations = sort_events_by_location_date(event_locations_unsorted)
+    print performing_artists
 
     return render_template("user_dashboard.html",
                             events=events,
                             artist=artist,
                             events_list=events_list,
                             user_id=user_id,
-                            data=json.dumps(event_locations))
+                            data=json.dumps(event_locations),
+                            performing_artists=json.dumps(performing_artists))
 
 @app.route('/dashboard')
 def dashboard():
@@ -476,6 +482,31 @@ def create_playlist_for_artists(artist_list):
 
     return playlist
 
+
+@app.route("/make-playlist.json")
+def make_playlist():
+    """Create a playlist based on the user's saved events."""
+
+    playlist_name = request.args.get('playlistName')
+    print playlist_name
+    artists = request.args.get('performingArtistsList')
+    artists = artists.split("+")
+    artists = artists[1:]
+
+    tracks = create_playlist_for_artists(artists)
+    list_of_tracks = []
+
+    for artist in tracks:
+        for track in artist:
+            track = track[1]
+            list_of_tracks.append(track)
+
+    no_duplicate_tracks = set(list_of_tracks)
+    list_of_tracks = list(no_duplicate_tracks)
+
+    results = {"tracks": list_of_tracks, "playlistName": playlist_name}
+
+    return jsonify(results)
 
 
 

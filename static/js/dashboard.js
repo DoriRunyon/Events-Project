@@ -5,10 +5,7 @@ function showEvents(result) {
  
     $(".related-artists-imgs").remove();
     $(".event").remove();
-  
-    console.log(result.events);
-    console.log(result.user_id);
-    console.log(result.my_map_thing);
+
     
 
     if (result.events.length < 1) {
@@ -167,7 +164,7 @@ function initMap() {
                 map: map,
                 title: eventInfo,
                 info: eventInfo,
-                icon: '/static/images/music_rock.png'
+                icon: '/static/images/musicnote2.png'
 
             });
             google.maps.event.addListener(marker, 'click', function () {
@@ -178,10 +175,45 @@ function initMap() {
 
 }
 
+function showPlaylist(result) {
+
+    // $("#playlists").remove();
+
+    var playlistName = result.playlistName;
+    console.log(playlistName);
+    $("#playlists").append("<h3>"+playlistName+"</h3>");
+
+    for (i=0; i< result.tracks.length; i++) {
+
+        console.log(result.tracks[i]);
+        $("#playlists").append("<li>"+result.tracks[i]+"</li>");
+    
+
+    }
+
+
+}
+
 function createPlaylist() {
 
-    alert("I work!");
+    var playlistName = prompt("What would you like to call your playlist?");
+
+    var performingArtistsList= "";
+
+    for (i=0; i< performingArtists.length; i++) {
+
+        performingArtistsList = performingArtistsList + "+" + performingArtists[i];
+    }
+
+    var userInputs = {'performingArtistsList': performingArtistsList, 'playlistName': playlistName};
+
+    $.get("/make-playlist.json",
+        userInputs,
+        showPlaylist);
+
 }
+
+
 
 google.maps.event.addDomListener(window, 'load', initMap);
 
