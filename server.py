@@ -1,4 +1,4 @@
-import spotipy, requests, os
+import spotipy, requests, os, json, grequests, urllib
 from jinja2 import StrictUndefined
 from pprint import pprint
 from flask import Flask, render_template, redirect, request, flash, session, url_for, jsonify
@@ -6,9 +6,7 @@ from flask_debugtoolbar import DebugToolbarExtension
 from model import connect_to_db, db, User, Artist, Event, UserEvent
 from werkzeug.contrib.cache import SimpleCache
 from datetime import datetime
-import json
-from operator import itemgetter, attrgetter
-from random import choice
+
 
 api_key = os.environ['SONGKICK_API_KEY']
 google_maps_api_key = os.environ['GOOGLE_MAPS_API_KEY']
@@ -197,6 +195,12 @@ def search_for_shows():
     city = request.args.get("city")
 
     related_artist_dict = check_for_events(searched_artist, city)
+    print "*********LOOK HERE********"
+    pprint(related_artist_dict)
+
+    if related_artist_dict is None:
+        error_message = "Error."
+        return jsonify({"wrong_input": error_message})
 
     searched_artist_name_img = [searched_artist.replace(" ", "-"), related_artist_dict[searched_artist]['img']]
     related_artist_names_imgs = []
@@ -211,7 +215,7 @@ def search_for_shows():
             if related_artist_dict[artist]['event'] is not None:
                 events.append([artist, related_artist_dict[artist]['event']])
 
-    results = {"events": events, "searched_artist_name_img": searched_artist_name_img, "related_artist_names_imgs": related_artist_names_imgs}
+    results = {"events": events, "searched_artist_name_img": searched_artist_name_img, "related_artist_names_imgs": related_artist_names_imgs, "wrong_input": None}
 
     return jsonify(results)
 
@@ -225,11 +229,15 @@ def get_artist_spotify_uri(artist):
         artist_uri = artist_db.artist_spotify_id
     else:
         artist_search = spotify.search(artist, limit=1, offset=0, type='artist')
-        print artist_search
-        artist_uri = artist_search['artists']['items'][0]['uri'].lstrip("spotify:artist:")
-        artist = Artist(artist_name=artist, artist_spotify_id=artist_uri)
-        db.session.add(artist)
-        db.session.commit()
+        if artist_search['artists']['items'] == []:
+            print artist_search['artists']['items']
+            return None
+
+        else:
+            artist_uri = artist_search['artists']['items'][0]['uri'].lstrip("spotify:artist:")
+            artist = Artist(artist_name=artist, artist_spotify_id=artist_uri)
+            db.session.add(artist)
+            db.session.commit()
 
     return artist_uri
 
@@ -268,6 +276,10 @@ def save_artist_to_db(artist):
     """Look up artist in db, if not there get artist info and save it to db."""
 
     artist_spotify_id = get_artist_spotify_uri(artist)
+
+    if artist_spotify_id is None:
+        return None
+
     artist_img = get_artist_img(artist)
     artist_songkick_id = get_artist_songkick_id(artist)
 
@@ -290,6 +302,10 @@ def get_related_artists(artist):
 
     save_artist_to_db(artist)
     artist_db = Artist.query.filter(Artist.artist_name == artist).first()
+
+    if artist_db is None:
+        return None
+
     artist_spotify_id = artist_db.artist_spotify_id
     artist_img = artist_db.artist_img
 
@@ -314,6 +330,54 @@ def get_related_artists(artist):
 
     return related_artist_dict
 
+def get_spotify_id_and_img_for_one_artist(artist):
+    """NEW MIGHT REMOVE"""
+
+    save_artist_to_db(artist)
+    artist_db = Artist.query.filter(Artist.artist_name == artist).first()
+
+    if artist_db is None:
+        return None
+
+    artist_spotify_id = artist_db.artist_spotify_id
+    artist_img = artist_db.artist_img
+
+    artist_info = [artist_spotify_id, artist_img]
+
+    return artist_info
+
+def request_spotify_related_artists(artist):
+    """NEW MIGHT REMOVE"""
+
+    artist_spotify_id = get_artist_spotify_uri(artist)
+
+    related_artists = spotify.artist_related_artists(artist_spotify_id)
+    related_artists = related_artists['artists']
+
+    return related_artists
+
+def make_new_related_artist_dict(artist):
+    """NEW MIGHT REMOVE"""
+
+    related_artist_dict = {}
+    artist_info = get_spotify_id_and_img_for_one_artist(artist)
+    print artist_info, "LOOK HERE??"
+    related_artist_info = request_spotify_related_artists(artist)
+
+    related_artist_dict[artist] = {'spotify_uri': artist_info[0],
+                                    'event': None,
+                                    'img': artist_info[1]}
+
+    for artist in related_artist_info:
+        artist_name = artist['name']
+        artist_spotify_id = artist['uri'].lstrip("spotify:artist:")
+        if artist['images'] == []:
+            artist_img = 'https://pbs.twimg.com/profile_images/1324123785/macaroni_noodle_icom_-_web_taken_400x400.jpg'
+        else:
+            artist_img = artist['images'][0]['url']
+        related_artist_dict[artist_name] = {'spotify_uri': artist_spotify_id, 'event': None, 'img': artist_img}
+
+    return related_artist_dict
 
 
 def save_event_to_db(event_dict):
@@ -351,63 +415,122 @@ def save_event_to_db(event_dict):
 
 
 
-def check_for_events(artist, user_city):
-    """Checks for events for a given dictionary of artists and adds Songkick URI to the dictionary if event is found."""
+def make_artist_list(related_artist_dict):
+    """NEW MIGHT DELETE Makes a list of artist names from the related artist dictionary."""
 
-    related_artist_dict = get_related_artists(artist)
+    related_artist_list = []
+
+    if related_artist_dict is None:
+        return None
 
     for artist, info in related_artist_dict.iteritems():
+        related_artist_list.append(artist)
 
+    return related_artist_list
+
+def get_songkick_ids(related_artist_list):
+    """NEW MIGHT REMOVE"""
+
+    songkick_id_requests = []
+    for artist in related_artist_list:
+        artist = artist.encode('ascii', 'ignore')
         payload = {'query': artist, 'apikey': api_key}
-        artist_request = 'http://api.songkick.com/api/3.0/search/artists.json'
+        payload_url = urllib.urlencode(payload)
+        artist_request = 'http://api.songkick.com/api/3.0/search/artists.json?%s' % (payload_url)
 
-        artist_id = cache.get(artist)
+        # artist_id = requests.get(artist_request, params=payload)
+        songkick_id_requests.append(artist_request)
 
-        if artist_id is None:
-            artist_id = requests.get(artist_request, params=payload)
-            cache.set(artist, artist_id, timeout=24 * 60 * 60)
-        
+    #create set of unsent requests
+    print songkick_id_requests
+    rs = (grequests.get(u) for u in songkick_id_requests)
+    print rs
+
+    #send requests all at once
+    songkick_id_responses = grequests.map(rs)
+    print songkick_id_responses
+
+    #make a dictionary out of each response object, put songkick ID in list
+    artist_songkick_ids = []
+    for artist_id in songkick_id_responses:
         jdict_artist = artist_id.json()
 
         if 'artist' in jdict_artist['resultsPage']['results']:
             artist_songkick_id = jdict_artist['resultsPage']['results']['artist'][0]['id']
+            artist_songkick_ids.append(artist_songkick_id)
 
-            event_request = "http://api.songkick.com/api/3.0/artists/%s/calendar.json?apikey=%s" % (artist_songkick_id, api_key)
+    return artist_songkick_ids
 
+def get_artist_calendars(artist_songkick_ids):
+    """NEW MIGHT REMOVE"""
 
-            artist_calendar = cache.get(artist_songkick_id)
-            if artist_calendar is None:
-                artist_calendar = requests.get(event_request)
-                cache.set(artist_songkick_id, artist_calendar, timeout=24 * 60 * 60)
+    calendar_requests = []
 
-            jdict_events = artist_calendar.json()
+    for artist_id in artist_songkick_ids:
+        event_request = "http://api.songkick.com/api/3.0/artists/%s/calendar.json?apikey=%s" % (artist_id, api_key)
+        # artist_calendar = requests.get(event_request)
+        calendar_requests.append(event_request)
 
-            if jdict_events['resultsPage']['totalEntries'] != 0:
-                list_of_events = jdict_events['resultsPage']['results']['event']
-            else:
-                continue
+    #create a set of unsent requests
+    rs = (grequests.get(u) for u in calendar_requests)
 
-            for event in list_of_events:
+    #send all requests at once
+    calendar_responses = grequests.map(rs)
+
+    all_events = []
+    for calendar in calendar_responses:
+        jdict_events = calendar.json()
+
+        if jdict_events['resultsPage']['totalEntries'] != 0:
+            list_of_events = jdict_events['resultsPage']['results']['event']
+            all_events.append(list_of_events)
+        else:
+            continue
+
+    return all_events
+
+def search_events_for_city(all_events, user_city):
+
+    saved_events = []
+
+    #code for look for city in calendar
+    for calendar in all_events:
+        for event in calendar:
+            city = event['location']['city']
+            if user_city in city:
+                event_id = event['id']
+                event_name_date = event['displayName']
                 city = event['location']['city']
-                if user_city in city:
-                    event_id = event['id']
-                    event_name_date = event['displayName']
-                    city = event['location']['city']
-                    lat = event['location']['lat']
-                    lng = event['location']['lng']
-                    performing_artist = event['performance'][0]['displayName']
-                    event_datetime = event['start']['datetime']
-                    if event_datetime is None:
-                        event_datetime = event['start']['date']
-                    songkick_link = event['performance'][0]['artist']['uri']
-                    events_info = create_events_info_dict(event_id, event_name_date, city, lat, lng, performing_artist, event_datetime, songkick_link)
-                    save_event_to_db(events_info)
-                    related_artist_dict[artist]['event'] = {'id': event_id,
-                                                            'event_name': event_name_date,
-                                                            'city': city,
-                                                            'lat': lat,
-                                                            'lng': lng,
-                                                            'songkick_link': songkick_link}
+                lat = event['location']['lat']
+                lng = event['location']['lng']
+                performing_artist = event['performance'][0]['displayName']
+                event_datetime = event['start']['datetime']
+                if event_datetime is None:
+                    event_datetime = event['start']['date']
+                songkick_link = event['performance'][0]['artist']['uri']
+                events_info = create_events_info_dict(event_id, event_name_date, city, lat, lng, performing_artist, event_datetime, songkick_link)
+                save_event_to_db(events_info)
+                saved_event = [performing_artist, {'id': event_id,
+                                                    'event_name': event_name_date,
+                                                    'city': city,
+                                                    'lat': lat,
+                                                    'lng': lng,
+                                                    'songkick_link': songkick_link}]
+                saved_events.append(saved_event)
+
+    return saved_events
+
+def check_for_events(artist, user_city):
+
+    related_artist_dict = make_new_related_artist_dict(artist)
+    related_artist_list = make_artist_list(related_artist_dict)
+    artist_songkick_ids = get_songkick_ids(related_artist_list)
+    all_events = get_artist_calendars(artist_songkick_ids)
+    saved_events = search_events_for_city(all_events, user_city)
+
+    for artist in saved_events:
+        if artist[0] in related_artist_dict.keys():
+            related_artist_dict[artist[0]]['event'] = artist[1]
 
     return related_artist_dict
 

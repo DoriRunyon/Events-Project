@@ -6,7 +6,9 @@ function showEvents(result) {
     $(".related-artists-imgs").remove();
     $(".event").remove();
 
-    
+    if (result.error_message !== null) {
+        $("#show-message").text("Oops something went wrong, no artist could be found. Please try again.");
+    }
 
     if (result.events.length < 1) {
 
@@ -60,7 +62,6 @@ function showEvents(result) {
                 var artist_name = evt.target.id.replace(/[_-]/g, " ");
                 $("#artist").val(artist_name);
                 $("#city").val();
-                alert("Hey this is gonna take a while.. sorry :(");
                 getFormInputs();
         });
     
@@ -103,13 +104,17 @@ function saveShow(evt) {
 function showUserSavedEvents(result) {
 
         var eventName = result.event_name;
-        alert("You saved: "+eventName);
+        alert("You saved: " + eventName);
 
 }
 
 
 
 function initMap() {
+
+ 
+    geocoder = new google.maps.Geocoder();
+
 
     var myLatLng = {lat: 40.7306, lng: -73.935242};
     var bounds = new google.maps.LatLngBounds();
@@ -192,7 +197,58 @@ function createPlaylist() {
 
 }
 
+var geocoder;
 
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(successFunction, errorFunction);
+}
+//Get the latitude and the longitude;
+function successFunction(position) {
+    var lat = position.coords.latitude;
+    var lng = position.coords.longitude;
+    codeLatLng(lat, lng);
+}
+
+function errorFunction(){
+    alert("Geocoder failed");
+}
+
+
+function codeLatLng(lat, lng) {
+
+    var latlng = new google.maps.LatLng(lat, lng);
+    geocoder.geocode({'latLng': latlng}, function(results, status) {
+      if (status == google.maps.GeocoderStatus.OK) {
+      console.log(results);
+        if (results[1]) {
+         //formatted address
+         // alert(results[0].formatted_address);
+        //find country name
+             for (var i=0; i<results[0].address_components.length; i++) {
+            for (var b=0;b<results[0].address_components[i].types.length;b++) {
+
+            //there are different types that might hold a city admin_area_lvl_1 usually does in come cases looking for sublocality type will be more appropriate
+                if (results[0].address_components[i].types[b] == "locality") {
+                    //this is the object you are looking for
+                    city= results[0].address_components[i];
+                    break;
+                }
+            }
+        }
+        //city data
+        // alert(city.long_name);
+        var myCity = city.long_name;
+        $("#city").val(myCity);
+
+
+        } else {
+          alert("No results found");
+        }
+      } else {
+        alert("Geocoder failed due to: " + status);
+      }
+    });
+  }
 
 google.maps.event.addDomListener(window, 'load', initMap);
 
