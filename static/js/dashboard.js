@@ -53,7 +53,9 @@ function showEvents(result) {
 
      for (i=0; i< result.related_artist_names_imgs.length; i++) {
 
-        $('.related-artists').append("<span class='related-artists-imgs'><img id="+result.related_artist_names_imgs[i][0]+" src="+result.related_artist_names_imgs[i][1]+"></span>");
+
+        var artistNameforimg = result.related_artist_names_imgs[i][0].replace(/-/g, " ");
+        $('.related-artists').append("<span class='related-artists-imgs'><img id="+result.related_artist_names_imgs[i][0]+" src="+result.related_artist_names_imgs[i][1]+"><p class='text'>"+artistNameforimg+"</p></span>");
 
       }
 
@@ -254,6 +256,4 @@ google.maps.event.addDomListener(window, 'load', initMap);
 
 $('#search-shows').click(getFormInputs);
 $('#create-playlist').click(createPlaylist);
-
-
 

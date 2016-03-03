@@ -14,11 +14,13 @@
     text-decoration: underline
 }
 
-.related-artists-imgs img {
-    z-index:1;
-    width: 10%;
-    height: 10%;
 
+
+.artist-name:hover {
+    position: absolute;
+    top: 50px;
+    left: 0;
+    width: 100%;
 }
 
 .saved_event {
@@ -66,5 +68,61 @@
     float: left;
     clear: both;
 
+}
+
+.related-artists-imgs {
+
+    width: 0;
+}
+
+
+.related-artists-imgs img {
+    display: inline-block;
+   /* position: relative;*/
+    z-index:1;
+    width: 10%;
+    height: 10%;
+    margin: 0;
+
+}
+
+.related-artists-imgs p {
+
+    display: inline-block;
+    position:relative;
+    right:150px;
+    visibility:hidden;
+
+}
+
+.related-artists-imgs:hover p {
+    visibility:visible;
+    font-size: 20px;
+    color: white;
+}
+
+
+
+.wrapper img {
+
+    display: inline-block;
+  /*  position: relative;*/
+    z-index:1;
+    width: 10%;
+    height: 10%;
+}
+
+.wrapper p {
+
+    display: inline-block;
+    position:relative;
+    right:150px;
+    visibility:hidden;
+}
+
+.wrapper:hover p {
+    visibility:visible;
+    font-size: 20px;
+    color: white;
 }
 

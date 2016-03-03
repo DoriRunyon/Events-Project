@@ -105,7 +105,6 @@ def save_show():
 
 def sort_events_by_location_date(event_locations):
     """Sorts an event list by location and if there are duplicates, keeps only the event with the closest date.
-
     >>> [sort_events_by_location_date([[(1, 2), "2016-04-23 20:00:00", "event name"], [(5, 2), "2016-04-23 20:00:00", "event name"], [(1, 6), "2016-04-23 20:00:00", "event name"], [(1, 2), "2016-04-26 20:00:00", "event name"]])]
     [[[1, 2, 'event name'], [1, 6, 'event name'], [5, 2, 'event name']]]
     """
@@ -608,7 +607,9 @@ def make_playlist():
 
     return jsonify(results)
 
-
+@app.route("/test")
+def show_test():
+    return render_template("test.html")
 
 if __name__ == "__main__":
     # We have to set debug=True here, since it has to be True at the point
