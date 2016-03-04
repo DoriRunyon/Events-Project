@@ -9,6 +9,8 @@ from datetime import datetime
 
 
 api_key = os.environ['SONGKICK_API_KEY']
+spotify_consumer_key = os.environ['SPOTIFY_CONSUMER_KEY']
+spotify_consumer_secret = os.environ['SPOTIFY_CONSUMER_SECRET']
 google_maps_api_key = os.environ['GOOGLE_MAPS_API_KEY']
 cache = SimpleCache()
 spotify = spotipy.Spotify()
@@ -103,34 +105,6 @@ def save_show():
     return jsonify({'event_name': event_name})
 
 
-def sort_events_by_location_date(event_locations):
-    """Sorts an event list by location and if there are duplicates, keeps only the event with the closest date.
-    >>> [sort_events_by_location_date([[(1, 2), "2016-04-23 20:00:00", "event name"], [(5, 2), "2016-04-23 20:00:00", "event name"], [(1, 6), "2016-04-23 20:00:00", "event name"], [(1, 2), "2016-04-26 20:00:00", "event name"]])]
-    [[[1, 2, 'event name'], [1, 6, 'event name'], [5, 2, 'event name']]]
-    """
-
-    event_locations_dict = {}
-    event_locations_new = []
-
-    for event in event_locations:
-        event_datetime = event[1]
-        if event[0] in event_locations_dict:
-            stuff = event_locations_dict[event[0]][0]
-            if event_datetime < event_locations_dict[event[0]][0]:
-                event_locations_dict[event[0]] = [event_datetime, event[2]]
-        else:
-            event_locations_dict[event[0]] = [event_datetime, event[2]]
-
-    for key, value in event_locations_dict.iteritems():
-        lat = key[0]
-        lng = key[1]
-        event_name = value[1]
-        event = [lat, lng, event_name]
-        event_locations_new.append(event)
-
-    return event_locations_new
-
-
 @app.route('/dashboard/<int:user_id>')
 def user_dashboard(user_id):
     """Dashboard for user, can search shows and see saved shows and playlists."""
@@ -194,8 +168,6 @@ def search_for_shows():
     city = request.args.get("city")
 
     related_artist_dict = check_for_events(searched_artist, city)
-    print "*********LOOK HERE********"
-    pprint(related_artist_dict)
 
     if related_artist_dict is None:
         error_message = "Error."
@@ -219,6 +191,30 @@ def search_for_shows():
     return jsonify(results)
 
 
+@app.route("/make-playlist.json")
+def make_playlist():
+    """Create a playlist based on the user's saved events."""
+
+    playlist_name = request.args.get('playlistName')
+    print playlist_name
+    artists = request.args.get('performingArtistsList')
+    artists = artists.split("+")
+    artists = artists[1:]
+
+    tracks = create_playlist_for_artists(artists)
+    list_of_tracks = []
+
+    for artist in tracks:
+        for track in artist:
+            track = track[1]
+            list_of_tracks.append(track)
+
+    no_duplicate_tracks = set(list_of_tracks)
+    list_of_tracks = list(no_duplicate_tracks)
+
+    results = {"tracks": list_of_tracks, "playlistName": playlist_name}
+
+    return jsonify(results)
 
 def get_artist_spotify_uri(artist):
     """Search for artist in database, if not there, get spotify URI and save artist to db."""
@@ -330,7 +326,7 @@ def get_related_artists(artist):
     return related_artist_dict
 
 def get_spotify_id_and_img_for_one_artist(artist):
-    """NEW MIGHT REMOVE"""
+    """Gets Spotify id and img for artist."""
 
     save_artist_to_db(artist)
     artist_db = Artist.query.filter(Artist.artist_name == artist).first()
@@ -346,7 +342,7 @@ def get_spotify_id_and_img_for_one_artist(artist):
     return artist_info
 
 def request_spotify_related_artists(artist):
-    """NEW MIGHT REMOVE"""
+    """Requests related artists from Spotify given artist name."""
 
     artist_spotify_id = get_artist_spotify_uri(artist)
 
@@ -356,7 +352,7 @@ def request_spotify_related_artists(artist):
     return related_artists
 
 def make_new_related_artist_dict(artist):
-    """NEW MIGHT REMOVE"""
+    """Requests related artist from Spotify, puts all artist info into a dictionary."""
 
     related_artist_dict = {}
     artist_info = get_spotify_id_and_img_for_one_artist(artist)
@@ -415,7 +411,11 @@ def save_event_to_db(event_dict):
 
 
 def make_artist_list(related_artist_dict):
-    """NEW MIGHT DELETE Makes a list of artist names from the related artist dictionary."""
+    """Makes a list of artist names from the related artist dictionary.
+
+    >>> [make_artist_list({'artist': {'spotify_uri': '123', 'event': 'x', 'img': 'x'}, 'artist2': {'spotify_uri': '123', 'event': 'x', 'img': 'x'}})]
+    [['artist2', 'artist']]
+    """
 
     related_artist_list = []
 
@@ -428,7 +428,7 @@ def make_artist_list(related_artist_dict):
     return related_artist_list
 
 def get_songkick_ids(related_artist_list):
-    """NEW MIGHT REMOVE"""
+    """Given list of artist names, gets Songkick ids."""
 
     songkick_id_requests = []
     for artist in related_artist_list:
@@ -461,7 +461,7 @@ def get_songkick_ids(related_artist_list):
     return artist_songkick_ids
 
 def get_artist_calendars(artist_songkick_ids):
-    """NEW MIGHT REMOVE"""
+    """Given artist songkick ids, requests artist calendars from Songkick."""
 
     calendar_requests = []
 
@@ -489,6 +489,7 @@ def get_artist_calendars(artist_songkick_ids):
     return all_events
 
 def search_events_for_city(all_events, user_city):
+    """Searches artist calendars for city, returns events where city matches."""
 
     saved_events = []
 
@@ -520,6 +521,7 @@ def search_events_for_city(all_events, user_city):
     return saved_events
 
 def check_for_events(artist, user_city):
+    """Makes requests to Spotify for related artists, requests to Songkick for event calendars and returns events for city if found."""
 
     related_artist_dict = make_new_related_artist_dict(artist)
     related_artist_list = make_artist_list(related_artist_dict)
@@ -582,34 +584,33 @@ def create_playlist_for_artists(artist_list):
     return playlist
 
 
-@app.route("/make-playlist.json")
-def make_playlist():
-    """Create a playlist based on the user's saved events."""
+def sort_events_by_location_date(event_locations):
+    """Sorts an event list by location and if there are duplicates, keeps only the event with the closest date.
+    >>> [sort_events_by_location_date([[(1, 2), "2016-04-23 20:00:00", "event name"], [(5, 2), "2016-04-23 20:00:00", "event name"], [(1, 6), "2016-04-23 20:00:00", "event name"], [(1, 2), "2016-04-26 20:00:00", "event name"]])]
+    [[[1, 2, 'event name'], [1, 6, 'event name'], [5, 2, 'event name']]]
+    """
 
-    playlist_name = request.args.get('playlistName')
-    print playlist_name
-    artists = request.args.get('performingArtistsList')
-    artists = artists.split("+")
-    artists = artists[1:]
+    event_locations_dict = {}
+    event_locations_new = []
 
-    tracks = create_playlist_for_artists(artists)
-    list_of_tracks = []
+    for event in event_locations:
+        event_datetime = event[1]
+        if event[0] in event_locations_dict:
+            stuff = event_locations_dict[event[0]][0]
+            if event_datetime < event_locations_dict[event[0]][0]:
+                event_locations_dict[event[0]] = [event_datetime, event[2]]
+        else:
+            event_locations_dict[event[0]] = [event_datetime, event[2]]
 
-    for artist in tracks:
-        for track in artist:
-            track = track[1]
-            list_of_tracks.append(track)
+    for key, value in event_locations_dict.iteritems():
+        lat = key[0]
+        lng = key[1]
+        event_name = value[1]
+        event = [lat, lng, event_name]
+        event_locations_new.append(event)
 
-    no_duplicate_tracks = set(list_of_tracks)
-    list_of_tracks = list(no_duplicate_tracks)
+    return event_locations_new
 
-    results = {"tracks": list_of_tracks, "playlistName": playlist_name}
-
-    return jsonify(results)
-
-@app.route("/test")
-def show_test():
-    return render_template("test.html")
 
 if __name__ == "__main__":
     # We have to set debug=True here, since it has to be True at the point

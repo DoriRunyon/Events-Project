@@ -105,8 +105,11 @@ function saveShow(evt) {
 
 function showUserSavedEvents(result) {
 
+
         var eventName = result.event_name;
         alert("You saved: " + eventName);
+    
+
 
 }
 
@@ -167,7 +170,7 @@ function showPlaylist(result) {
 
     var playlistName = result.playlistName;
     console.log(playlistName);
-    $("#playlists").append("<h3>"+playlistName+"</h3>");
+    $("#playlist-name").append("<a data-toggle='collapse' href='#collapse1'>"+playlistName+"</a>");
 
     for (i=0; i< result.tracks.length; i++) {
 

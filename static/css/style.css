@@ -63,6 +63,18 @@
     margin: 20px;
 }
 
+.panel-group {
+
+    float: left;
+    clear: both;
+}
+
+#playlist-name {
+
+/*    float: left;*/
+    clear: both;
+}
+
 #playlists {
 
     float: left;

@@ -60,7 +60,18 @@
     <div id="map"></div>
     </div>
 
-    <div id="playlists"></div>
+    <div class="panel-group">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4 class="panel-title" id="playlist-name">
+                </h4>
+            </div>
+            <div id="collapse1" class="panel-collapse collapse">
+                <ul id="playlists">
+                </ul>
+           </div>
+      </div>
+    </div>
 
 <script type="text/javascript">
           var locations = ({{ data|safe }});
