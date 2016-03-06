@@ -55,7 +55,7 @@ function showEvents(result) {
 
 
         var artistNameforimg = result.related_artist_names_imgs[i][0].replace(/-/g, " ");
-        $('.related-artists').append("<span class='related-artists-imgs'><img id="+result.related_artist_names_imgs[i][0]+" src="+result.related_artist_names_imgs[i][1]+"><p class='text'>"+artistNameforimg+"</p></span>");
+        $('.related-artists').append("<span class='related-artists-imgs'><img id="+result.related_artist_names_imgs[i][0]+" src="+result.related_artist_names_imgs[i][1]+"></span>");
 
       }
 

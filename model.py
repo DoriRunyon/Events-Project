@@ -83,57 +83,24 @@ class Artist(db.Model):
         return "<Event artist_id=%s artist_name =%s>" % (self.artist_id,
                                                          self.artist_name)
 
+def example_data():
+    """Create some sample data."""
 
-class Playlist(db.Model):
-    """Table for generating playlist based on user saved events."""
+    # In case this is run more than once, empty out existing data
+    User.query.delete()
 
-    __tablename__ = "playlists"
+    # Add sample employees and departments
+    admin = User(email='admin', password='default')
 
-    playlist_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    playlist_spotify_id = db.Column(db.String(100), nullable=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=False)
-    playlist_name = db.Column(db.String(100), nullable=True)
-
-    user = db.relationship('User', backref=db.backref("users"))
-
-    def __repr__(self):
-        """Provide helpful representation when printed."""
-
-        return "<Event playlist_id=%s playlist_name =%s>" % (self.playlist_id,
-                                                             self.playlist_name)
+    db.session.add_all([admin])
+    db.session.commit()
 
 
-class PlaylistTracks(db.Model):
-    """Association table for playlists user has created."""
-
-    __tablename__ = "playlist_tracks"
-
-    playlist_track_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    playlist_id = db.Column(db.Integer, db.ForeignKey('playlists.playlist_id'), nullable=False)
-    track_id = db.Column(db.Integer, db.ForeignKey('tracks.track_id'), nullable=False)
-
-
-class Track(db.Model):
-    """Table for tracks saved by users to create a playlist."""
-
-    __tablename__ = "tracks"
-
-    track_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    track_name = db.Column(db.String(100), nullable=True)
-    track_spotify_id = db.Column(db.String(100), nullable=True)
-
-    def __repr__(self):
-        """Provide helpful representation when printed."""
-
-        return "<Event track_id=%s track_name =%s>" % (self.track_id,
-                                                       self.track_name)
-
-
-def connect_to_db(app):
+def connect_to_db(app, db_uri="postgresql:///noodledb"):
     """Connect the database to our Flask app."""
 
     # Configure to use our postgres database
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgres:///noodledb'
+    app.config['SQLALCHEMY_DATABASE_URI'] = db_uri
     app.config['SQLALCHEMY_ECHO'] = True
     db.app = app
     db.init_app(app)

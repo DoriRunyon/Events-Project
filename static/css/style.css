@@ -90,7 +90,7 @@
 
 .related-artists-imgs img {
     display: inline-block;
-   /* position: relative;*/
+    position: relative;
     z-index:1;
     width: 10%;
     height: 10%;
@@ -98,7 +98,7 @@
 
 }
 
-.related-artists-imgs p {
+/*.related-artists-imgs p {
 
     display: inline-block;
     position:relative;
@@ -111,7 +111,7 @@
     visibility:visible;
     font-size: 20px;
     color: white;
-}
+}*/
 
 
 
