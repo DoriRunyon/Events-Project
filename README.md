@@ -61,7 +61,7 @@ Your saved concerts will appear under 'My Saved Shows' along with a map showing 
 
 ## <a name="next">Version 2.0
 
-Next steps for the app include allowing users to save a playlist to their Spotify account and adding an alert feature (using the Twilio API) such that users will receive a text reminding them about their events.
+Next steps for the app include allowing users to save a playlist to their Spotify account and adding an alert feature (using the Twilio API) such that users will receive a text reminding them about their events. Another cool feature would be to show artist popularity level, so that  you could direct your searches to up and coming artists versus very popular artists. Showing artist name, genres and popularity on hover over the artist images is also something to be added.
 
 ## <a name="author">Author
 Dori Runyon is a software engineer in Oakland, CA. 
