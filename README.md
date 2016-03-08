@@ -1,6 +1,5 @@
 Do you love seeing live music and want to discover up-and-coming artists? Broadcast quickly searches for concerts based on whatever mood and city you’re in. Enter an artist and city (or let the geolocator automatically determine your city) and Broadcast will ask the Spotify API for related artists, then will asynchronously request each artist’s calendar from the Songkick API to determine if the group has any upcoming events. Multiple searches can subsequently be performed by clicking on artist images. A user can save events they find interesting to their profile and view event venues on an interactive map. Users can also create a playlist based on their saved events. 
 
-The app is named after one of the author's favorite bands - not to be confused with the Yahoo acquired internet radio company! It's first name was Noodle, which was ultimately deemed too silly, in addition to the fact that noodles don't have much to do with concerts.
 
 ![Broadcast Homepage](https://github.com/DoriRunyon/Events-Project/blob/master/static/images/Broadcast_homepage.png)
 
