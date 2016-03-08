@@ -51,7 +51,7 @@ Broadcast has not yet been deployed. See below for instructions on how to run th
 ## <a name="use">Using Broadcast
 
 ### Enter an artist name and your city (or let geolocator determine your location), then click `Submit`
-The search results (displayed below) show concerts found for the artist you searched for, and for the 20 related artists, based on Spotify's related artist relationships. When you click 'Submit' the app requests related artists from Spotify, then asynchronously requests calendars for each of those artists from Songkick. The desired city is then searched for within each calendar, and if found, the even is saved to the PostgreSQL database. Click 'Buy Tickets' to purchase tickets or click 'Save Show' to save the event to your profile. Any of the images below the event results can be clicked to easily run another search. 
+The search results (displayed below) show concerts found for the artist you searched for, and for the 20 related artists, based on Spotify's related artist relationships. When you click 'Submit' the app requests related artists from Spotify, then asynchronously requests calendars for each of those artists from Songkick. The desired city is then searched for within each calendar. Click 'Buy Tickets' to purchase tickets or click 'Save Show' to save the event to your profile. Any of the images below the event results can be clicked to easily run another search. 
 
 ![Broadcast Search Results](https://github.com/DoriRunyon/Events-Project/blob/master/static/images/Broadcast_search.png)
 
