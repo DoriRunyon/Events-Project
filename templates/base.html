@@ -1,70 +1,80 @@
 <!doctype html>
-<html  ng-app="myApp">
+<html>
 <head>
   <title>Broadcast</title>
 
   <link rel="stylesheet" type="text/css" href="/static/css/style.css">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+  <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.1.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Open+Sans:400,300">
 
   
 </head>
-
-<body>
-
-     
+   
       <script src="http://code.jquery.com/jquery.js"></script>
       <script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
       <script src="http://code.jquery.com/ui/1.11.1/jquery-ui.min.js"></script>
       <link rel="stylesheet" href="https://code.jquery.com/ui/1.11.1/themes/smoothness/jquery-ui.css" />
       <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
       <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
-
       <script src="https://maps.googleapis.com/maps/api/js"></script>
 
-     <nav class="navbar navbar-default">
+      
+<body class="base">
 
-    <div class="container-fluid">
-      <div class="navbar-header">
-        <div id="navbar">
-        
-   {% if 'user' not in session %} 
+<div>
 
-               <ul class="nav navbar-nav">
-                    <form action="/logged-in" method="POST">
-                        <li id="email">Email: 
-                        <input type="text" name="email"></li>
-            
-                        <li id="password">Password: 
-                        <input type="text" name="password"></li>
-                      
-                        <input type="submit" value="Login">
-                    </form>
-              
-
-                    <li><a href="/create-account">Create Account</a></li>
-
-                {% else %}
-                 <li><a href="/log-out">Log Out</a></li>
-                {% endif %}
-                </ul>
-
-
-              </div>
+<nav class="navbar navbar-default">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <button type="button"
+              class="navbar-toggle collapsed"
+              data-toggle="collapse"
+              data-target="#navbar"
+              aria-expanded="false"
+              aria-controls="navbar">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="/">Broadcast</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <!-- <form class="navbar-form" role="search">
+          <div class="form-group"> 
+            <input type="text" class="form-control" placeholder="artist" name="artist" id="artist">
+      
+            <input type="text" class="form-control" placeholder="city" name="city" id="city">
           </div>
-      </div>
-    </nav>
-
+            <button type="submit" class="btn btn-default" id="search-shows">Search</button>
+         </form> -->
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        {% if 'user' not in session %}
+        <li><a href="/create-account">Log In</a></li>
+        {% else %}
+        <li id="logout"><a href="/log-out">Log Out</a></li>
+        {% endif %}
+      </ul>
+    </div>
+  </div>
+</nav>
               <ul>
                 {% for message in get_flashed_messages() %}
                 <li>{{ message }}</li>
                 {% endfor %}
               </ul>
 
-  <div class="main">
-  {% block content %} put your content here {% endblock %}
-  </div>
+    <div class="main">
+    {% block content %} put your content here {% endblock %}
 
-  <script type="text/javascript" src="/static/js/dashboard.js"></script>
+    </div>
+   </div>
 
 </body>
+
+<script type="text/javascript" src="/static/js/dashboard.js"></script>
+      
 </html>

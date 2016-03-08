@@ -152,6 +152,7 @@ def dashboard():
 
     events = ""
     artist = ""
+    
 
     return render_template("dashboard.html",
                             events=events,
@@ -166,6 +167,9 @@ def search_for_shows():
 
     searched_artist = request.args.get("artist")
     city = request.args.get("city")
+
+    print searched_artist
+    print city
 
     related_artist_dict = check_for_events(searched_artist, city)
 

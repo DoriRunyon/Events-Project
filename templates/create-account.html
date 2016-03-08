@@ -1,17 +1,37 @@
 {% extends 'base.html' %}
 {% block content %}
 
-    <h2>Find cool shows! Create a new account below.</h2>
+<div class="container">
+    <h2>Find cool shows! Login or create a new account below.</h2>
+</div>
 
+<div class="container">
+    <h3>Login</h3>
+ <form action="/logged-in" method="POST">
+    
+    <input type="text" name="email" placeholder="email">
+    <p></p>
+     
+    <input type="text" name="password" placeholder="password">
+    <p></p>
+    <input type="submit" value="Login">
+ </form>
+</div>
+
+<hr/>
+
+<div class="container">
+    <h3>Create Account</h3>
     <form action='/process-new-account-form' method="POST">
-        Email: 
-        <input type="text" name="email">
+        
+        <input type="text" name="email" placeholder="email">
         <p></p>
-        Password: 
-        <input type="text" name="password">
+      
+        <input type="text" name="password" placeholder="password">
         <p></p>
         <input type="submit" value="Create Account">
     </form>
+</div>
 
 
 {% endblock %}

@@ -1,7 +1,9 @@
-
+$(document).ready( function() {
 
 
 function showEvents(result) {
+
+
  
     $(".related-artists-imgs").remove();
     $(".event").remove();
@@ -40,7 +42,7 @@ function showEvents(result) {
 
             eventContainer.append("<p id='eventname'>"+event_name+"</p>");
             eventContainer.append("<p>"+event_city+"</p>");
-            eventContainer.append("<a href="+songkick_link+">Buy Tickets</a>");
+            eventContainer.append("<a class='buy-tickets' href="+songkick_link+">Buy Tickets</a>");
             eventContainer.append(saveButton);
             eventContainer.append("<hr/>");
 
@@ -78,19 +80,25 @@ function getFormInputs(evt) {
         evt.preventDefault();
     }
 
+    console.log($('#artist').val());
+    console.log($('#city').val());
     findEvents($("#artist").val(), $("#city").val());
 
 }
 
 function findEvents(artist, city) {
 
-
     var userInputs = {'artist': artist, 'city': city};
+
+    // if (window.location.href === 'http://localhost:5000/') {
+
+    // window.location.href = "http://localhost:5000/dashboard?artist="+artist+"?city="+city;
+
+    // }
 
     $.get("/search-for-shows.json",
         userInputs,
         showEvents);
-
 }
 
 function saveShow(evt) {
@@ -170,6 +178,7 @@ function showPlaylist(result) {
 
     var playlistName = result.playlistName;
     console.log(playlistName);
+    $(".panel-group").show();
     $("#playlist-name").append("<a data-toggle='collapse' href='#collapse1'>"+playlistName+"</a>");
 
     for (i=0; i< result.tracks.length; i++) {
@@ -257,6 +266,17 @@ function codeLatLng(lat, lng) {
 
 google.maps.event.addDomListener(window, 'load', initMap);
 
+
+$('.btn').on('click', function() {
+    var $this = $(this);
+  $this.button('loading');
+    setTimeout(function() {
+       $this.button('reset');
+   }, 4000);
+});
+
 $('#search-shows').click(getFormInputs);
 $('#create-playlist').click(createPlaylist);
+
+});
 

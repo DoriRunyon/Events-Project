@@ -2,21 +2,27 @@
 {% block content %}
 
 
-    <h2>Welcome to <span style="font-weight: bold; font-size: 40px">Broadcast</span></h2>
+<div class="container">
+    <h2 id="welcome">Welcome to <span style="font-weight: bold; font-size: 40px">Broadcast</span></h2>
+</div>
 
 <!--    <div ng-app="myApp" ng-controller="MainController"><h1>{[ playlist ]}</h1><h1>{[ test ]}</h1></div> -->
 
-    <h3>Enter an artist and city to search for concerts</h3>
+<div class="container"> 
+
+    <h3 class="search-form">Enter an artist and city to search for concerts</h3>
     <form> 
-        Artist <input type="text" name="artist" id="artist">
+        <input type="text" placeholder="artist" name="artist" id="artist">
         <p></p>
-        City<input type="text" name="city" id="city">
+        <input type="text" placeholder="city" name="city" id="city">
         <p></p>
-        <input type="submit" value="Search" id="search-shows">
+        
+            <button type="button" class="btn btn-primary btn-lg" id="search-shows" data-loading-text="<i class='fa fa-spinner fa-spin '></i>Searching">Submit</button>
+   
     </form>
+</div>
 
-    <p></p>
-
+<div class="container"> 
     <div id="show-results">
          <p style="font-weight: bold" id="show-message"></p>
         <p></p>
@@ -25,41 +31,40 @@
         <p></p>
         <p></p>
         <h4 id="related-artists-for-artist"></h4>
+    
         <div class="related-artists"></div>
+    
     </div>
+</div>
 
-    <p></p>
-    <p></p>
-    <p></p>
-    <p></p>
-
-    <h3>My Saved Shows</h3>
-
-
-    <div id="user-saved-shows">
-
+<div class="container">
+    <h3 id="saved-shows-header">My Saved Shows</h3>
+        <div id="user-saved-shows">
+            <div class="row">
             {% for event in events_list %}
-                <div class="saved_event">
+                <div class="col-xs-6 col-md-2 col-lg-2 saved_event" >
                     <p>{{ event[1] }}</p>
                 </div>
             {% endfor %}
+            </div>
+        </div>
+</div>
 
-    </div>
-
-    <div id="dialog"></div>
+<div class="container">
+    
 
     <div class="playlist">
-    <button id="create-playlist">Create Spotify Playlist Based on Saved Shows</button>
+    <button id="create-playlist"></span>Create Spotify Playlist Based on Saved Shows</button>
     </div>
+</div>
 
-    <p></p>
-    <p></p>
-
+<div class="container">
     <div class="map-view">
-
     <div id="map"></div>
     </div>
+</div>
 
+<div class="container">
     <div class="panel-group">
         <div class="panel panel-default">
             <div class="panel-heading">
@@ -72,6 +77,7 @@
            </div>
       </div>
     </div>
+</div>
 
 <script type="text/javascript">
           var locations = ({{ data|safe }});

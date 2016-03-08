@@ -1,7 +1,34 @@
 
+
+
+.main-image {
+    height: 100%;
+    background: url("../images/rsz_emptystage.jpg") no-repeat center center;
+    background-size: cover;
+    position: absolute;
+    width: 100%;
+}
+
+
 * {
     list-style-type: none;
 
+}
+
+/*.main-image {
+    background:rgba(0, 0, 0, 0);
+}*/
+
+.base {
+
+    background-color: #333333;
+    color: #a9a9a9;
+}
+
+
+.container {
+
+    margin: 20px;
 }
 
 .nav, .navbar, .navbar-default, .navbar-default {
@@ -9,12 +36,16 @@
 
 }
 
+
+
 #eventname {
     font-weight: bold;
     text-decoration: underline
 }
 
-
+.buy-tickets {
+    margin: 5px;
+}
 
 .artist-name:hover {
     position: absolute;
@@ -23,14 +54,34 @@
     width: 100%;
 }
 
+input[type=text] {
+    border-radius: 10px;
+    border: white;
+    color: black;
+    padding: 5px;
+}
+
+input[type=submit] {
+    border-radius: 10px;
+    border: white;
+    color: white;
+}
+
+button {
+    border-radius: 10px !important;
+    border: white !important;
+    color: white !important;
+    background-color: black !important;
+}
+
 .saved_event {
 
     font-size: 15px;
     font-weight: bold;  
     width: 200px;
     height: 125px;
-    float: left;
-    margin-left: 10px;
+    /*float: left;
+    margin-left: 10px;*/
     margin: 10px;
     color: black;
     background-color: #eeeeee;
@@ -39,9 +90,10 @@
 
 }
 
-.map-view {
+.container #map {
     float: left;
     clear: both;
+    background-color: white;
 }
 
 #map {
@@ -57,11 +109,6 @@
 
 }
 
-
-.main {
-
-    margin: 20px;
-}
 
 .panel-group {
 
@@ -98,43 +145,26 @@
 
 }
 
-/*.related-artists-imgs p {
 
-    display: inline-block;
-    position:relative;
-    right:150px;
-    visibility:hidden;
+footer {
 
+ width: 100%;
+ height: 30px;
+ position: absolute;
+ bottom: 0;
+ left: 10px;
 }
 
-.related-artists-imgs:hover p {
-    visibility:visible;
-    font-size: 20px;
-    color: white;
-}*/
-
-
-
-.wrapper img {
-
-    display: inline-block;
-  /*  position: relative;*/
-    z-index:1;
-    width: 10%;
-    height: 10%;
+footer a {
+    margin: 10px;
 }
 
-.wrapper p {
-
-    display: inline-block;
-    position:relative;
-    right:150px;
-    visibility:hidden;
+.panel-group {
+    display: none;
 }
 
-.wrapper:hover p {
-    visibility:visible;
-    font-size: 20px;
-    color: white;
+.fa.fa-spinner.fa-spin {
+    margin-right: 8px;
 }
+
 
