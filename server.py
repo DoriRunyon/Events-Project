@@ -220,7 +220,7 @@ def make_playlist():
 
     return jsonify(results)
 
-def get_artist_spotify_uri(artist):
+def get_artist_spotify_uri(spotify, artist):
     """Search for artist in database, if not there, get spotify URI and save artist to db."""
 
     artist_db = Artist.query.filter(Artist.artist_name == artist).first()
@@ -274,7 +274,7 @@ def get_artist_songkick_id(artist):
 def save_artist_to_db(artist):
     """Look up artist in db, if not there get artist info and save it to db."""
 
-    artist_spotify_id = get_artist_spotify_uri(artist)
+    artist_spotify_id = get_artist_spotify_uri(spotify, artist)
 
     if artist_spotify_id is None:
         return None
@@ -348,7 +348,7 @@ def get_spotify_id_and_img_for_one_artist(artist):
 def request_spotify_related_artists(artist):
     """Requests related artists from Spotify given artist name."""
 
-    artist_spotify_id = get_artist_spotify_uri(artist)
+    artist_spotify_id = get_artist_spotify_uri(spotify, artist)
 
     related_artists = spotify.artist_related_artists(artist_spotify_id)
     related_artists = related_artists['artists']
@@ -557,11 +557,11 @@ def create_events_info_dict(event_id, event_name_date, city, lat, lng, performin
     return events_info
 
 
-def get_tracks_for_artist(artist):
+def get_tracks_for_artist(spotify, artist):
     """Gets artists top tracks. Tracks come from most popular list according to Spotify."""
 
 
-    artist_spotify_uri = get_artist_spotify_uri(artist)
+    artist_spotify_uri = get_artist_spotify_uri(spotify, artist)
     tracks = spotify.artist_top_tracks(artist_spotify_uri, country='US')
     tracks_list = []
 
@@ -582,7 +582,7 @@ def create_playlist_for_artists(artist_list):
     playlist = []
 
     for artist in artist_list:
-        tracks = get_tracks_for_artist(artist)
+        tracks = get_tracks_for_artist(spotify, artist)
         playlist.append(tracks[0:3])
 
     return playlist
@@ -621,7 +621,7 @@ def sort_events_by_location_date(event_locations):
 if __name__ == "__main__":
     # We have to set debug=True here, since it has to be True at the point
     # that we invoke the DebugToolbarExtension
-    app.debug = True
+    # app.debug = True
 
     connect_to_db(app)
 

@@ -101,7 +101,7 @@ def connect_to_db(app, db_uri="postgresql:///noodledb"):
 
     # Configure to use our postgres database
     app.config['SQLALCHEMY_DATABASE_URI'] = db_uri
-    app.config['SQLALCHEMY_ECHO'] = True
+    # app.config['SQLALCHEMY_ECHO'] = True
     db.app = app
     db.init_app(app)
 

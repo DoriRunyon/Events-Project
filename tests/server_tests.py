@@ -59,6 +59,3 @@ class FlaskTests(unittest.TestCase):
         assert 'Incorrect email or password, please try again' in rv.data
         rv = self.login('admin', 'defaultx')
         assert 'Incorrect email or password, please try again' in rv.data
-
-if __name__ == '__main__':
-    unittest.main() #provides a command-line interface to the test script (will say how many tets run, time it took and whether any failed)
