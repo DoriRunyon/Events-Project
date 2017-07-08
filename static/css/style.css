@@ -1,6 +1,4 @@
 
-
-
 .main-image {
     height: 100%;
     background: url("../images/rsz_emptystage.jpg") no-repeat center center;
@@ -129,7 +127,7 @@ button {
 
 }
 
-/*.related-artists-imgs {
+.related-artists-imgs {
 
     width: 0;
 }
@@ -143,7 +141,7 @@ button {
     height: 10%;
     margin: 0;
 
-}*/
+}
 
 
 footer {
@@ -166,29 +164,3 @@ footer a {
 .fa.fa-spinner.fa-spin {
     margin-right: 8px;
 }
-
-
-
-.related-artists.hover11.column::after {
-    content: '';
-    clear: both;
-    float: left;
-
-}
-
-
-.related-artists.hover11 img {
-    opacity: 1;
-   /* -webkit-transition: .3s ease-in-out;
-    transition: .3s ease-in-out;*/
-    width: 10%;
-    height: 10%;
-
-}
-
-.related-artists.hover11 img:hover {
-    opacity: .5;
-    -webkit-transition: .3s ease-in-out;
-    transition: .3s ease-in-out;
-}
-

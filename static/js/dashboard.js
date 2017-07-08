@@ -279,4 +279,3 @@ $('#search-shows').click(getFormInputs);
 $('#create-playlist').click(createPlaylist);
 
 });
-
