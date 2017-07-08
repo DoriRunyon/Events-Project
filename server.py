@@ -13,7 +13,6 @@ spotify_client_ID = os.environ['SPOTIFY_CONSUMER_KEY']
 spotify_client_secret = os.environ['SPOTIFY_CONSUMER_SECRET']
 google_maps_api_key = os.environ['GOOGLE_MAPS_API_KEY']
 cache = SimpleCache()
-spotify = spotipy.Spotify()
 
 app = Flask(__name__)
 
@@ -365,10 +364,13 @@ def get_spotify_id_and_img_for_one_artist(artist):
 def request_spotify_related_artists(artist):
     """Requests related artists from Spotify given artist name."""
 
-    artist_spotify_id = get_artist_spotify_uri(spotify, artist)
+    artist_spotify_id = get_artist_spotify_uri(artist)
 
-    related_artists = spotify.artist_related_artists(artist_spotify_id)
-    related_artists = related_artists['artists']
+    related_artist_endpoint = "https://api.spotify.com/v1/artists/" + artist_spotify_id + "/related-artists"
+    related_artist_request = requests.get(related_artist_endpoint, headers=authorization_header)
+    related_artist_dict = related_artist_request.json()
+
+    related_artists = related_artist_dict['artists']
 
     return related_artists
 
@@ -377,7 +379,6 @@ def make_new_related_artist_dict(artist):
 
     related_artist_dict = {}
     artist_info = get_spotify_id_and_img_for_one_artist(artist)
-    print artist_info, "LOOK HERE??"
     related_artist_info = request_spotify_related_artists(artist)
 
     related_artist_dict[artist] = {'spotify_uri': artist_info[0],
@@ -462,9 +463,7 @@ def get_songkick_ids(related_artist_list):
         songkick_id_requests.append(artist_request)
 
     #create set of unsent requests
-    print songkick_id_requests
     rs = (grequests.get(u) for u in songkick_id_requests)
-    print rs
 
     #send requests all at once
     songkick_id_responses = grequests.map(rs)
@@ -574,15 +573,17 @@ def create_events_info_dict(event_id, event_name_date, city, lat, lng, performin
     return events_info
 
 
-def get_tracks_for_artist(spotify, artist):
+def get_tracks_for_artist(artist):
     """Gets artists top tracks. Tracks come from most popular list according to Spotify."""
 
+    artist_spotify_id = get_artist_spotify_uri(artist)
+    top_tracks_endpoint = "https://api.spotify.com/v1/artists/" + artist_spotify_id + "/top-tracks?country=US"
+    top_tracks_request = requests.get(top_tracks_endpoint, headers=authorization_header)
+    tracks_dict = top_tracks_request.json()
 
-    artist_spotify_uri = get_artist_spotify_uri(spotify, artist)
-    tracks = spotify.artist_top_tracks(artist_spotify_uri, country='US')
     tracks_list = []
 
-    for track in tracks['tracks']:
+    for track in tracks_dict['tracks']:
         track_id = track['album']['id']
         track_name = track['album']['name']
         track = (track_id, track_name)
