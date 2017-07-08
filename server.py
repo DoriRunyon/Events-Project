@@ -6,11 +6,11 @@ from flask_debugtoolbar import DebugToolbarExtension
 from model import connect_to_db, db, User, Artist, Event, UserEvent
 from werkzeug.contrib.cache import SimpleCache
 from datetime import datetime
-
+from base64 import b64encode
 
 api_key = os.environ['SONGKICK_API_KEY']
-spotify_consumer_key = os.environ['SPOTIFY_CONSUMER_KEY']
-spotify_consumer_secret = os.environ['SPOTIFY_CONSUMER_SECRET']
+spotify_client_ID = os.environ['SPOTIFY_CONSUMER_KEY']
+spotify_client_secret = os.environ['SPOTIFY_CONSUMER_SECRET']
 google_maps_api_key = os.environ['GOOGLE_MAPS_API_KEY']
 cache = SimpleCache()
 spotify = spotipy.Spotify()
@@ -20,6 +20,17 @@ app = Flask(__name__)
 app.secret_key = "ABC"
 app.jinja_env.undefined = StrictUndefined
 
+grant_type = 'client_credentials'
+
+#Request based on Client Credentials Flow from https://developer.spotify.com/web-api/authorization-guide/
+#Request body parameter: grant_type Value: Required. Set it to client_credentials
+body_params = {'grant_type' : grant_type}
+url='https://accounts.spotify.com/api/token'
+response = requests.post(url, data=body_params, auth=(spotify_client_ID, spotify_client_secret))
+response_data = json.loads(response.text)
+access_token = response_data["access_token"]
+
+authorization_header = {"Authorization":"Bearer {}".format(access_token)}
 
 
 @app.route('/')
@@ -220,20 +231,20 @@ def make_playlist():
 
     return jsonify(results)
 
-def get_artist_spotify_uri(spotify, artist):
-    """Search for artist in database, if not there, get spotify URI and save artist to db."""
+def get_artist_spotify_uri(artist):
+    """Search for artist URI in database, if not there, get spotify URI and save artist to db."""
 
     artist_db = Artist.query.filter(Artist.artist_name == artist).first()
     if artist_db is not None:
         artist_uri = artist_db.artist_spotify_id
     else:
-        artist_search = spotify.search(artist, limit=1, offset=0, type='artist')
-        if artist_search['artists']['items'] == []:
-            print artist_search['artists']['items']
+        artist_request = "https://api.spotify.com/v1/search?q=" + artist + "&type=artist"
+        artist_id = requests.get(artist_request, headers=authorization_header)
+        artist_dict = artist_id.json()
+        if artist_dict['artists']['items'] == []:
             return None
-
         else:
-            artist_uri = artist_search['artists']['items'][0]['uri'].lstrip("spotify:artist:")
+            artist_uri = artist_dict['artists']['items'][0]['uri'].lstrip("spotify:artist:")
             artist = Artist(artist_name=artist, artist_spotify_id=artist_uri)
             db.session.add(artist)
             db.session.commit()
@@ -244,11 +255,15 @@ def get_artist_spotify_uri(spotify, artist):
 def get_artist_img(artist):
     """Get an artist's image from Spotify."""
 
-    results = spotify.search(q='artist:' + artist, type='artist')
-    items = results['artists']['items']
-    if len(items) > 0:
-        artist_lu = items[0]
-        artist_img = artist_lu['images'][0]['url']
+    artist_request = "https://api.spotify.com/v1/search?q=" + artist + "&type=artist"
+    artist_id = requests.get(artist_request, headers=authorization_header)
+    artist_dict = artist_id.json()
+    pprint(artist_dict)
+
+    artists = artist_dict['artists']['items']
+    if len(artists) > 0:
+        first_artist = artists[0]
+        artist_img = first_artist['images'][0]['url']
     else:
         artist_img = 'https://pbs.twimg.com/profile_images/1324123785/macaroni_noodle_icom_-_web_taken_400x400.jpg'
 
