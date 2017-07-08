@@ -258,7 +258,6 @@ def get_artist_img(artist):
     artist_request = "https://api.spotify.com/v1/search?q=" + artist + "&type=artist"
     artist_id = requests.get(artist_request, headers=authorization_header)
     artist_dict = artist_id.json()
-    pprint(artist_dict)
 
     artists = artist_dict['artists']['items']
     if len(artists) > 0:
@@ -289,7 +288,7 @@ def get_artist_songkick_id(artist):
 def save_artist_to_db(artist):
     """Look up artist in db, if not there get artist info and save it to db."""
 
-    artist_spotify_id = get_artist_spotify_uri(spotify, artist)
+    artist_spotify_id = get_artist_spotify_uri(artist)
 
     if artist_spotify_id is None:
         return None
@@ -330,8 +329,11 @@ def get_related_artists(artist):
                                     'img': artist_img}
 
     #get related artists for user entered artist
-    related_artists = spotify.artist_related_artists(related_artist_dict[artist]['spotify_uri'])
-    related_artists = related_artists['artists']
+    related_artist_endpoint = "https://api.spotify.com/v1/artists/" + artist_spotify_id + "/related-artists"
+    related_artist_request = requests.get(related_artist_endpoint, headers=authorization_header)
+    related_artist_dict = related_artist_request.json()
+
+    related_artists = related_artist_dict['artists']
 
     for artist in related_artists:
         artist_name = artist['name']
@@ -340,7 +342,7 @@ def get_related_artists(artist):
             artist_img = 'https://pbs.twimg.com/profile_images/1324123785/macaroni_noodle_icom_-_web_taken_400x400.jpg'
         else:
             artist_img = artist['images'][0]['url']
-        related_artist_dict[artist_name] = {'spotify_uri': artist_spotify_id, 'event': None, 'img': artist_img}
+        related_artist_dict[artist_name] = {'spotify_uri': artist_uri, 'event': None, 'img': artist_img}
 
     return related_artist_dict
 
